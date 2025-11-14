@@ -1,0 +1,131 @@
+#-------------The process Overseer-------------
+# List active system processes
+ps aux
+
+#Monitor process resource usage
+top
+
+Identify which processes are using a lot of resources
+![alt img](./image.png)
+
+#Identifying key processes
+If you have the PID, you can use the following command:
+ps -p 195 -o pid,ppid,cmd
+This command lists the process and its associated ID and location
+You can further narrow the search based on PID with pgrep.
+
+#Terminate the process
+pkill resource_hog.sh
+
+Check:
+ps aux | grep resource_hog
+
+Run background process and write logs to process.log
+
+nohup ./data_processor.sh > processor.log &
+nohup = no hang up
+This command writes from the data_processor script to the processor.log file in the background
+
+#-------------The Network Navigator-------------
+One of the web servers has stopped. We need to find out the network status and restore the connection.
+First, we list the network interfaces with the ip command.
+
+> ip addr
+Result:
+2: eth0: 1500 qdisc mq state UP group default qlen 1000 < BROADCAST,MULTICAST,UP,LOWER_UP > mtu
+So there is an interface.
+
+Does it have an IP?
+Check it with: ifconfig. This is the content of the net-tools package.
+# Expected output showing IP configuration
+eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST> mtu 1500
+inet 172.16.50.108 netmask 255.255.255.0 broadcast 172.16.50.255
+ether 00:16:3e:04:b0:40 txqueuelen 1000 (Ethernet)
+
+lo: flags=73<UP,LOOPBACK,RUNNING> mtu 65536
+inet 127.0.0.1 netmask 255.0.0.0
+
+Test the connection to the remote host:
+ping 8.8.8.8 -c 4
+There is a response, which means there is a problem with the application.
+
+Is the application running and listening on the correct port?
+To do this, we use ss (socket statistics command)
+ss -tlnp | grep 8000
+# Expected output showing a listening process on port 8000
+LISTEN 0 5 0.0.0.0:8000 0.0.0.0:* users:(("python3",pid=3765,fd=3))
+
+We checked everything, only one reason remains: firewall
+Tasks:
+Create a firewall that denies access on port 8000.
+We add a firewall to allow incoming SSH connections (port 22)
+Enable the new firewall
+
+Deny port access:
+sudo ufw deny 8000
+Allow SSH:
+sudo ufw allow ssh or ufw allow 22
+Enable the firewall:
+sudo ufw enable
+
+#------------The Software Steward-------------
+sudo apt install
+sudo apt update
+
+install a cli tool that displays system information visually
+sudo apt install neofetch
+
+Verify installation:
+sudo apt show neofetch
+dpkg -s: lists dependent packages too!
+
+Remove obsolate packages if no longer needed to keep security
+sudo apt remove figlet
+Remove orphaned packages:
+sudo apt autoremove
+
+#------------The Backup Sentinel-------------
+Only change the files you need, the important files are in the data, config and logs folders in this folder.
+1.
+Pack the files and compress them:
+create a file: backup-list.txt
+Append the lines to the file with echo:
+echo -e "data\nconfig\nlogs" >> backup-list.txt
+Here the -e parameter = interpretation which allows us to add new lines.
+
+for backup we use the tar command and then compress it with gzip.
+-T = read the objects to be copied from the file
+-czf = create, compress, specify filename
+-f = system-backup.tar.gz
+-v = not used now, especially useful for large files if progress is needed
+
+tar -T backup-list.txt -czf ./backups/system-backup.tar.gz
+
+2. Verification
+we list them in a backup-contents.txt file with the tar command.
+This requires a .txt file
+-t = list the list of an archive
+-z = gzip
+-v = detailed list
+-f = specify the location of the backup file
+
+This will write the contents of the backup compress to a txt file:
+tar -tf ./backups/system-backup.tar.gz -zv >> backup-contents.txt
+
+3. Restore from backup:
+Scenario: the config/app.conf file was accidentally deleted, it needs to be restored from backup.
+-x = specify the specific file
+tar -xzf system-backup.tar.gz config/app.conf
+
+4. Automatic backup with cron:
+Open the cron editor:
+crontab -e
+
+The format for a cron job is: [minute] [hour] [day_of_month] [month] [day_of_week] [command]. * * * * * means every minute of every hour of every day.
+
+* * * * * = every minute of every hour of every day
+* * * * * tar -czf /home/project/backups/system-backup-$(date +\%Y-\%m-\%d_\%H-\%M-\%S).tar.gz -C /home/project .
+
+#--------------The Script Artisan-------------
+Create automated shell scripts to manage numerous log files.
+script is available in log_manager.sh
