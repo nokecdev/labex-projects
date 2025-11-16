@@ -129,3 +129,50 @@ The format for a cron job is: [minute] [hour] [day_of_month] [month] [day_of_wee
 #--------------The Script Artisan-------------
 Create automated shell scripts to manage numerous log files.
 script is available in log_manager.sh
+
+
+##---------------File and directory operations-----------------
+Create nested directory structure
+mkdir -p nested/structure/example
+tree nested
+nested
+└── structure
+    └── example
+
+Rename or move file:
+mv file1.txt renamed_file.txt
+
+Move folder back with one directory:
+cp -r nested dir1/
+tree dir1
+dir1
+├── file1.txt
+└── nested
+    └── structure
+        └── example
+
+Search files in current directory and subdirectories:
+find . -name "*.txt"
+
+Search for files greater than 1MB:
+find ~ -size +1M
+
+Search for files that were modified in the last 24 hours:
+find ~ -mtime -1
+
+View two first line of a file:
+head -n 2 multiline.txt
+
+View last two line of a file:
+tail -n 2 multiline.txt
+
+##---------------Find a file and change its ownership and permissions-----------------
+Feladat: A fájl valahol az /etc mappában lesz.
+sudo find /etc/ -name "*sources.list*"
+2 fájl-t talált:
+/etc/apt/sources.list
+/etc/apt/sources.list.d
+Jog és ownership megváltoztatása:
+sudo chown labex:labex /etc/apt/sources.list
+sudo chmod 600 /etc/apt/sources.list 
+
