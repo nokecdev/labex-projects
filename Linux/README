@@ -126,6 +126,13 @@ The format for a cron job is: [minute] [hour] [day_of_month] [month] [day_of_wee
 * * * * * = every minute of every hour of every day
 * * * * * tar -czf /home/project/backups/system-backup-$(date +\%Y-\%m-\%d_\%H-\%M-\%S).tar.gz -C /home/project .
 
+### Create zip files:
+This command recursively creates a test_archive.zip folder from test_dir
+zip -r test_archive.zip test_dir
+
+To unzip:
+unzip -d unzipped_files test_archive.zip
+
 #--------------The Script Artisan-------------
 Create automated shell scripts to manage numerous log files.
 script is available in log_manager.sh
