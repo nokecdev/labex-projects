@@ -263,3 +263,51 @@ It's useful in CSV files, logs, when needs to be combined.
 ----------
 
 
+## Run processes in the background
+We have a long running script. To show, run:
+jobs
+Send the process to background: bg %1
+Run in foreground: fg %1
+Suspend process: Ctrl + Z
+
+## Logical operators
+_&&: Runs the second parameter after the first_
+labex:logical_commands_lab/ $ mkdir test_dir && echo "Directory created successfully"
+_||: Runs the second parameter if the first parameter fails_
+mkdir test_dir || echo "Failed to create directory"
+_Command separator (;)_
+executes the commands in order
+_>: Redirects the input to file_
+echo "Goodbye, World" > greeting.txt
+cat greeting.txt
+_>>: Appends to the file_
+_Pipeline operator |:_
+echo "apple banana cherry date elderberry" | tr ' ' '\n' | sort
+ Takes the output of the left hand, and uses it as an input for the right hand
+
+## Transfer files with sftp
+sftp sftpuser@127.0.0.1
+To upload files: put /home/labex /.zshrc
+Download files: get .zshrc
+Check the status of ftp server: sudo service vsftpd status
+Start ftp server: sudo service vsftpd start
+
+### Connect with ftp:
+ftp 127.0.0.1
+Enter username and password.
+
+### Copy files from and to
+scp [options] [source] [dest]
+Source and dest can be local or remote. For remote use the following format: username@host:path
+
+Obtain password of the labex acc: printenv |grep PASSWORD=
+1. Copy with scp: scp file1.txt labex@127.0.0.1:/home/labex/file-scp.txt
+2. Enter password
+
+### Download files with scp
+scp labex@127.0.0.1:/home/labex/file-scp.txt /home/labex/file-scp-new.txt
+
+## Parameters of scp
+-r - This option allows you to recursively copy entire directories.
+-C - This option enables compression during file transfer, which can be useful when transferring large files over a slow connection.
+-P - This option allows you to specify a port number for the connection.
