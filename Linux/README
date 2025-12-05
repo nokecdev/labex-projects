@@ -183,3 +183,6 @@ Jog és ownership megváltoztatása:
 sudo chown labex:labex /etc/apt/sources.list
 sudo chmod 600 /etc/apt/sources.list 
 
+## ------------------ Columnizing text
+This command creates a column from example.txt and uses : as a delimiter
+column -t -s ':' example.txt
