@@ -126,6 +126,14 @@ The format for a cron job is: [minute] [hour] [day_of_month] [month] [day_of_wee
 * * * * * = every minute of every hour of every day
 * * * * * tar -czf /home/project/backups/system-backup-$(date +\%Y-\%m-\%d_\%H-\%M-\%S).tar.gz -C /home/project .
 
+
+------------------------
+to create a backup from a folder
+-----------------------
+sudo tar -tzvf $(date +%Y-%m-%d).tar.gz /var/app
+Ez létrehoz egy tar-t a jelenlegi dátummal
+
+-----------
 ### Create zip files:
 This command recursively creates a test_archive.zip folder from test_dir
 zip -r test_archive.zip test_dir
@@ -182,6 +190,129 @@ sudo find /etc/ -name "*sources.list*"
 Jog és ownership megváltoztatása:
 sudo chown labex:labex /etc/apt/sources.list
 sudo chmod 600 /etc/apt/sources.list 
+
+
+## ---------------Grep command - Pattern searching-----------------
+Search errors in server.log:
+grep "ERROR" logs/server.log
+
+Count errors:
+grep -c "ERROR" logs/server.log
+
+Case insensitive search:
+grep -i "error" logs/server.log
+
+Search for specific phrase in logs
+grep "database connection failed" logs/*
+
+Search with regex
+grep "2023-[0-9][0-9]-[0-9][0-9]" logs/server.log
+
+Search for lines where matches CRITICAL
+-B 2 -A 2
+Returns before 2 lines, and after 2 lines
+grep -B 2 -A 2 "CRITICAL" logs/server.log
+
+Inverted search. Returns lines that DOESN'T contain ERROR
+grep -v "ERROR" logs/server.log
+
+
+## -------------------- Text Processing ----------------
+
+### tr command
+Removes all 'o', 'h', 'l' letters from the 'hello labex' 
+echo 'hello labex' | tr -d 'ohl'
+----------
+Squeeze letters, this command will print 'helo'
+echo 'hello' | tr -s 'l'
+----------
+Convert text to uppercase. This command replaces letters from the first set to the second set. Prints out 'HELLO' as a result
+echo 'hello' | tr '[:lower:]' '[:upper:]'
+----------
+Format text w col
+cat -A /etc/protocols | head -n 10
+cat /etc/protocols | col -x | cat -A | head -n 10
+----------
+Join files similiarly to database join operation
+Join requires numbered lines in order to join the lines to each other.
+Example:
+echo -e "1 apple\n2 banana\n3 cherry" > fruits.txt
+echo -e "1 red\n2 yellow\n3 red" > colors.txt
+This two command creates two files with numbers
+The join command matches them by numbers.
+join fruits.txt colors.txt
+Result:
+1 apple red
+2 banana yellow
+3 cherry red
+If no numbers, there might be unexpected error or no output at all.
+----------
+Paste command. It does not require a common field like numbers in the join command.
+echo -e "apple\nbanana\ncherry" > fruits.txt
+echo -e "red\nyellow\nred" > colors.txt
+echo -e "sweet\nsweet\nsweet" > tastes.txt
+It creates a table from the files:
+apple   red     sweet
+banana  yellow  sweet
+cherry  red     sweet
+By default paste uses tabulator but it can be defined with -d parameter.
+It can also be serialized with -s parameter. So it prints out the following way:
+apple   banana  cherry
+red     yellow  red
+sweet   sweet   sweet
+It's useful in CSV files, logs, when needs to be combined.
+----------
+
+
+## Run processes in the background
+We have a long running script. To show, run:
+jobs
+Send the process to background: bg %1
+Run in foreground: fg %1
+Suspend process: Ctrl + Z
+
+## Logical operators
+_&&: Runs the second parameter after the first_
+labex:logical_commands_lab/ $ mkdir test_dir && echo "Directory created successfully"
+_||: Runs the second parameter if the first parameter fails_
+mkdir test_dir || echo "Failed to create directory"
+_Command separator (;)_
+executes the commands in order
+_>: Redirects the input to file_
+echo "Goodbye, World" > greeting.txt
+cat greeting.txt
+_>>: Appends to the file_
+_Pipeline operator |:_
+echo "apple banana cherry date elderberry" | tr ' ' '\n' | sort
+ Takes the output of the left hand, and uses it as an input for the right hand
+
+## Transfer files with sftp
+sftp sftpuser@127.0.0.1
+To upload files: put /home/labex /.zshrc
+Download files: get .zshrc
+Check the status of ftp server: sudo service vsftpd status
+Start ftp server: sudo service vsftpd start
+
+### Connect with ftp:
+ftp 127.0.0.1
+Enter username and password.
+
+### Copy files from and to
+scp [options] [source] [dest]
+Source and dest can be local or remote. For remote use the following format: username@host:path
+
+Obtain password of the labex acc: printenv |grep PASSWORD=
+1. Copy with scp: scp file1.txt labex@127.0.0.1:/home/labex/file-scp.txt
+2. Enter password
+
+### Download files with scp
+scp labex@127.0.0.1:/home/labex/file-scp.txt /home/labex/file-scp-new.txt
+
+## Parameters of scp
+-r - This option allows you to recursively copy entire directories.
+-C - This option enables compression during file transfer, which can be useful when transferring large files over a slow connection.
+-P - This option allows you to specify a port number for the connection.
+
 
 ## ------------------ Columnizing text
 This command creates a column from example.txt and uses : as a delimiter
