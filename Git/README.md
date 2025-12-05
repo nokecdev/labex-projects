@@ -120,3 +120,29 @@ Result:
 Extremely powerful command, use with caution. (Or exceptional cases)
 With this command every commit can be modified differently just like before but from the first commit.
 git rebase -i --root
+
+# Git stash
+By default untracked files are not stashed, to include them use command:
+```git stash -u```
+
+git stash apply - keeps the changes in the stash
+git stash pop - applies the changes but also removes them from the stash
+
+``` 
+git stash push -m "Stash message"
+```
+Creates a stash with message
+
+Check the changes in a stash:
+``` git stash show stash@{1} ```
+
+Show with diff:
+``` git stash show -p stash@{1} ```
+
+Clear stashes:
+``` git stash clear ```
+
+Restore specific stash:
+``` git stash pop stash@{2} ```
+
+
