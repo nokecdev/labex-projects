@@ -317,3 +317,11 @@ scp labex@127.0.0.1:/home/labex/file-scp.txt /home/labex/file-scp-new.txt
 ## ------------------ Columnizing text
 This command creates a column from example.txt and uses : as a delimiter
 column -t -s ':' example.txt
+
+## File editing
+Remove files with find:
+find . -mindepth 1 -delete
+Count lines and write the result out into result.txt
+cat access.log | wc -l > result.txt
+Split content by ; and write it out into result1.txt:
+sed 's/;/\n/g' ~/project/split-me.txt > ~/project/result1.txt
