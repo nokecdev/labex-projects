@@ -325,3 +325,9 @@ Count lines and write the result out into result.txt
 cat access.log | wc -l > result.txt
 Split content by ; and write it out into result1.txt:
 sed 's/;/\n/g' ~/project/split-me.txt > ~/project/result1.txt
+
+## File System and Disk management
+df -h - Human readable disk details
+du ~  - disk usage
+du -sh ~/* - Lists the home directory disk usage
+du -h ~ | sort -rh | head -n 10 - Lists the top 10 space consuming folders
