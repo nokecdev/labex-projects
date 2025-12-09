@@ -331,3 +331,47 @@ df -h - Human readable disk details
 du ~  - disk usage
 du -sh ~/* - Lists the home directory disk usage
 du -h ~ | sort -rh | head -n 10 - Lists the top 10 space consuming folders
+
+## File Location with mlocate #################
+sudo apt-get update
+sudo updatedb
+
+#Search file:
+locate daemon_config.txt
+
+Search files that contains passwd:
+locate passwd
+/var/lib/dpkg/info/base-passwd.preinst
+/var/lib/dpkg/info/base-passwd.templates
+/var/lib/dpkg/info/passwd.conffiles
+/var/lib/dpkg/info/passwd.list
+/var/lib/dpkg/info/passwd.md5sums
+/var/lib/dpkg/info/passwd.postinst
+/var/lib/dpkg/info/passwd.postrm
+/var/lib/dpkg/info/passwd.preinst
+/var/lib/dpkg/info/passwd.prerm
+
+### Case-Insensitive search
+locate -i DAEMON_config.txt
+### Search for files that match the regular expression:
+Ez visszaadja az összes .log fájlt a var folderból
+locate -r "/var/log.*\.log$"
+### Limit te results
+locate -n 5 ".conf"
+### Locate file that have been modified in the last 24 hour
+find /home/labex -type f -mtime -1
+### Combine with grep:
+locate conf | grep ssh
+__________________________
+When to Use locate vs find
+Use locate when:
+
+You need quick results
+You're searching for files by name
+The files you're looking for existed when updatedb was last run
+Use find when:
+
+You need to search based on attributes like file size or modification time
+You need to find files created or modified after the last updatedb run
+You need to perform actions on the files you find
+_________________________________________________
