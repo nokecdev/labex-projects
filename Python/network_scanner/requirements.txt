@@ -1,0 +1,3 @@
+nmap
+python3-tk
+python-nmap
