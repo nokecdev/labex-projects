@@ -46,3 +46,40 @@ curl -X POST \
 }  
 
 
+# Run 
+docker run -it --name ubuntu-interactive ubuntu /bin/bash
+
+# Get address of a container 
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' <container-name>
+
+# Get status of a running container
+docker inspect -f '{{.State.Status}}' <container-name>
+
+# Stream container log output
+docker logs -f <container-name>
+
+# Get an interactive shell inside the container
+docker exec -it <container-name> /bin/bash
+For example we can print out the nginx config file inside the nginx container:
+cat /etc/nginx/nginx.conf
+
+# Copy files into container
+echo "Hello" > hello.txt
+Copy:
+docker cp hello.txt <container-name>:/usr/share/nginx/hello.txt
+Review:
+docker exec <container-name> cat /usr/share/nginx/hello.txt
+
+_Copy from container to host:_
+docker cp <container-name>:/etc/nginx/nginx.conf ~/project/nginx.conf
+Verify:
+ls -l ~/project/nginx.conf
+
+# Setting environment variables in containers
+docker run --name env-test -e MY_VAR="Hello, Environment" -d ubuntu sleep infinity
+sleep infinity: runs the container indefinitely
+
+# Run container with limited resources
+docker run --name limited-nginx -d --memory=512m --cpus=0.5 nginx
+# Verify
+docker stats limited-nginx
