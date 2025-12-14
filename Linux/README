@@ -375,3 +375,41 @@ You need to search based on attributes like file size or modification time
 You need to find files created or modified after the last updatedb run
 You need to perform actions on the files you find
 _________________________________________________
+
+# Terminate applications
+### SIGTERM (15): Gracefully terminate the process. This is the default signal sent by the kill command.
+### SIGKILL (9): Forcefully kill the process. This should be used as a last resort when SIGTERM doesn't work.
+Create a background process:
+```sleep 1000 & ```
+
+Get running sleep process's PID and terminate process with SIGTERM:
+```ps aux | grep sleep```
+```kill PID```
+If no success run the SIGKILL command:
+kill -9 PID
+
+## Using killall command
+Run multiple background process:
+sleep 2000 &
+sleep 2000 &
+sleep 2000 &
+
+## Verify if they are running:
+``` ps aux | grep sleep```
+### Terminate
+``` sudo killall sleep ```
+### Verify
+```` ps aux | grep sleep ```
+
+### Using pkill command
+Run multiple background process:
+sleep 3000 &
+sleep 3000 &
+sleep 3000 &
+
+Use the pkill command
+``` sudo pkill sleep ```
+
+Verify processes:
+ps aux | grep sleep
+
