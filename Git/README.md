@@ -146,3 +146,30 @@ Restore specific stash:
 ``` git stash pop stash@{2} ```
 
 
+### How to handle error: 'error: untracked working tree files would be overwritten by checkout' in git
+This error occurs when there are changes in the working branch and without commit we change branch. 
+
+labex:git-checkout-demo/ (main*) $ git checkout feature-branch
+error: The following untracked working tree files would be overwritten by checkout:
+	feature.md
+Please move or remove them before you switch branches.
+Aborting
+
+How to resolve it:
+
+One of the safest and most common way is using __git stash__
+To stash untracked files use the --include-untracked option
+```git stash push --include-untracked```
+See a confirmed message.
+Verify: 
+```git status```
+On branch main
+nothing to commit, working tree clean
+Push the stash again: git stash pop
+
+Solution:
+So before branching track the files or add to gitignore.
+``` git add feature.md```
+git commit -m "Add local version of feature.md"
+git checkout feature-branch
+
