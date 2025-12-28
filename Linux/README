@@ -413,3 +413,9 @@ Use the pkill command
 Verify processes:
 ps aux | grep sleep
 
+
+### Working with Curl
+Detailed debugging:
+curl -v https://example.com
+
+
