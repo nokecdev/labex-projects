@@ -66,3 +66,6 @@ MY_DATE=$(date +%Y-%m-%d)
 echo "Today's date is $MY_DATE."
 Output:
 Today's date is 2024-03-07.
+
+### Search man page by keyword
+man -k curl

@@ -413,9 +413,41 @@ Use the pkill command
 Verify processes:
 ps aux | grep sleep
 
-
 ### Working with Curl
 Detailed debugging:
 curl -v https://example.com
 
+### Task schedule
+This command updates every 5 minutes instead of the default 2:
+watch -n 5 date 
+
+Automate with cron:
+crontab -l
+Ha nincs installálva:
+sudo apt update
+sudo apt install cron
+
+Start cron:
+sudo service cron start
+Verify:
+sudo service cron status
+
+List crontab tasks:
+crontab -l
+
+Syntax: 
+* * * * * command_to_execute
+
+Minute (0-59)
+Hour (0-23)
+Day of the month (1-31)
+Month (1-12)
+Day of the week (0-7, where both 0 and 7 represent Sunday)
+
+15,45 9-17 * * 1-5 /path/to/script.sh
+This means: "Run /path/to/script.sh at 15 and 45 minutes past every hour from 9 AM to 5 PM, Monday to Friday"
+
+### Trap command
+Useful when terminating processes and cleaning, detatching or other actions required.
+Example code is created in the trap_command.sh file
 

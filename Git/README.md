@@ -145,6 +145,9 @@ Clear stashes:
 Restore specific stash:
 ``` git stash pop stash@{2} ```
 
+# Making important milestones
+In Git, tags are used to mark specific points in a repository's history as being important. Typically, people use this functionality to mark release points (v1.0, v2.0, etc.).
+Imagine you have just finished a feature and want to release it as Version 1.0. Here is how you would apply everything you learned:
 
 ### How to handle error: 'error: untracked working tree files would be overwritten by checkout' in git
 This error occurs when there are changes in the working branch and without commit we change branch. 
@@ -173,3 +176,64 @@ So before branching track the files or add to gitignore.
 git commit -m "Add local version of feature.md"
 git checkout feature-branch
 
+
+There are two main types of tags you've explored:
+
+1. Lightweight Tags
+A lightweight tag is very much like a branch that doesn’t change—it’s just a pointer to a specific commit.
+
+Example:
+To create a lightweight tag at your current commit:
+
+git tag v1.0-lw
+2. Annotated Tags (Recommended)
+Annotated tags are stored as full objects in the Git database. They contain the tagger name, email, date, and a message. These are recommended for public releases.
+
+Example from your history:
+You created an annotated tag for your first major release:
+
+git tag -a v1.0 -m "First major release"
+3. Tagging Later
+You don't always have to tag the current commit. You can tag a commit from the past by specifying the commit checksum (or part of it).
+
+Example from your history:
+You tagged an earlier commit (f8f6906) with a specific version:
+
+git tag v0.0.1 f8f6906
+4. Viewing Tag Information
+You can list tags or view the detailed information (especially useful for annotated tags).
+
+
+The "One Example" Workflow
+
+Mark the Release (Annotated Tag):
+Create a tag with a descriptive message so your team knows what this version is for.
+
+git tag -a v1.0 -m "Official release with area calculation features"
+Verify the Tag:
+Check the details to ensure the metadata is correct.
+
+git show v1.0
+Go Back in Time (Checkout):
+If a bug is reported in this specific version later, you can travel back to exactly how the code looked at that moment.
+
+git checkout v1.0
+Clean Up (Delete):
+If you realize you made a typo in the tag name (e.g., v1.0-wrong), you can remove it.
+
+git tag -d v1.0-wrong
+Key Takeaway
+Use Annotated tags (-a) for your important project milestones because they act like a "signed document" in your Git history, recording who created the tag and why.
+
+Examples:
+
+List all tags: git tag
+See tag details: git show v1.0 (This shows who tagged it, when, and the message you wrote).
+Summary Checklist:
+Action	Command
+Create Annotated Tag	git tag -a <name> -m "message"
+Create Lightweight Tag	git tag <name>
+Tag Past Commit	git tag <name> <checksum>
+List Tags	git tag
+View Tag Details	git show <name>
+Delete tag: git tag -d v0.0.1
