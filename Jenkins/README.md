@@ -29,3 +29,63 @@ This tells Jenkins to run the project immediately. In a production environment, 
 Click on the specific build number (e.g., #1) in the Build History and opened the Console Output.
 This is the most important troubleshooting step. The Console Output shows you exactly what happened during the execution. If a build fails, this is where you find the error logs to fix the problem.
 
+# Jenkins Pipelines
+These are the instructions for Jenkinsfile
+pipeline { ... }: The main block that defines the entire pipeline.
+agent any: Instructs Jenkins to run this pipeline on any available agent.
+environment { ... }: Defines environment variables that can be used throughout the pipeline.
+stages { ... }: A wrapper for all the stages in the pipeline.
+stage('...') { ... }: Defines specific stages. Stages help visualize the workflow.
+steps { ... }: Contains the actual commands to be executed in a stage.
+echo '...': A step that prints a message to the build log.
+sh '...': A step that executes shell commands.
+
+What are the steps to create a pipeline from git repository
+
+pipeline {
+    agent any
+    environment {
+        DEPLOY_TARGET = 'staging'
+    }
+    stages {
+        // ... other stages ...
+        stage('Deploy') {
+            steps {
+                echo "Deploying the application to ${env.DEPLOY_TARGET}..."
+                sh 'echo "Application deployed successfully!"'
+            }
+        }
+    }
+}
+
+Key points about environment variables in Jenkins Pipelines:
+
+The environment { ... } block defines variables that are available throughout the pipeline.
+Variables are accessed using ${env.VARIABLE_NAME} syntax.
+It is crucial to use double quotes (") for strings with variable interpolation, as Groovy's variable interpolation only works inside double-quoted strings.
+Environment variables make your pipelines more flexible and easier to maintain.
+
+🌟 Key Takeaways: Jenkins Pipelines
+1. Pipeline as Code Concept
+
+You learned that a CI/CD process shouldn't just be manual clicks; it should be defined in a text file called a Jenkinsfile and stored in version control (Git).
+2. Jenkins Pipeline Project Types
+
+Pipeline Project: Created via the Jenkins UI.
+Pipeline from SCM: Configured Jenkins to pull the instructions (Jenkinsfile) directly from a remote GitHub repository. This ensures that your pipeline versioning stays in sync with your code.
+3. Declarative Pipeline Structure
+You explored the standard structure of a Jenkinsfile:
+
+pipeline { ... }: The mandatory outer block.
+agent any: Tells Jenkins to run the pipeline on any available worker.
+stages { ... }: The container for all the work to be done.
+stage('Name') { ... }: Logical segments (e.g., Build, Test, Deploy) that make the process easy to visualize and debug.
+steps { ... }: The actual commands (like echo or shell scripts) executed inside a stage.
+4. Environment Variables
+
+You learned how to use the environment block to define variables.
+Used ${VAR_NAME} syntax inside steps to make your pipeline dynamic and reusable.
+5. Monitoring & Execution
+
+Console Output: You learned how to verify the success of your pipeline by checking the logs to see exactly what happened during each step.
+Stage View: Observed how the Jenkins UI breaks down the execution time and status for each individual stage.
