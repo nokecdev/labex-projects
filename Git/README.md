@@ -237,3 +237,54 @@ Tag Past Commit	git tag <name> <checksum>
 List Tags	git tag
 View Tag Details	git show <name>
 Delete tag: git tag -d v0.0.1
+
+# Git History And Log Management
+
+Basic History Viewing: Using git log to see the list of commits.
+
+Custom Formatting: Using flags like --oneline, --graph, and --pretty to make the history easier to read or parsable by other tools.
+
+Time Filtering: Using --since and --until to find commits from specific dates.
+
+Content Searching: Using the "pickaxe" (-S) or -G to find exactly when a specific string of code was added or removed.
+
+Data Insights: Using git shortlog and combined shell commands (like awk and sort) to generate statistics on who contributed what and which files changed the most.
+
+How to Display the Git History of a Specific File
+
+To see the history of just one specific file, you simply provide the file path as an argument to the git log command.
+
+## Here are the most common ways to do it:
+
+1. Simple history for a file:
+
+```
+git log filename.txt
+```
+2. See the history with the actual code changes (diffs):
+```
+git log -p filename.txt
+```
+The -p stands for "patch", showing you exactly what lines were added or removed in each commit for that file.
+
+3. Condensed one-line history for a file:
+```
+git log --oneline filename.txt
+```
+4. Follow a file even if it was renamed:
+```
+git log --follow filename.txt
+```
+This is very useful if you renamed old_name.js to new_name.js and want to see the history from before the rename.
+
+Based on your environment history, if you wanted to see the history of your script file, you would run:
+```
+git log script.js
+```
+5. Search for files and format the output:
+Use the git log command with the --format=pretty:"" parameter to receive a nicely formatted output:
+Here are the arguments for pretty command:
+%H = Get the hash of the commit
+%an = author name
+%s = commit subject
+%cr = relative commit date
