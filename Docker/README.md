@@ -111,3 +111,98 @@ docker stats limited-nginx
 | --network   |	Connects the container to a specific Docker network.                  |
 | --restart   |	Sets the Restart Policy (e.g., unless-stopped) for reliability.       |
 | -w          |	Sets the Working Directory inside the container.                      |
+
+
+# Network types
+bridge: This is the default network driver. When you start a container without specifying a network, it automatically connects to the bridge network. Containers on the same bridge network can communicate with each other using their IP addresses.
+
+host: This driver removes network isolation between the container and the Docker host. The container shares the host's networking namespace, which means it uses the host's IP address and port space directly. This can be useful for optimizing performance in certain scenarios.
+
+none: This driver disables all networking for a container. Containers using this network type will have no access to external networks or other containers. It's useful when you want to completely isolate a container.
+
+## Inspect the default network bridge
+Run the next command to inspect the bridge network
+```docker network inspect bridge```
+
+Example:
+```
+[
+  {
+    "Name": "bridge",
+    "Id": "79dce413aafdd7934fa3c1d0cc97decb823891ce406442b7d51be6126ef06a5e",
+    "Created": "2024-08-22T09:58:39.747333789+08:00",
+    "Scope": "local",
+    "Driver": "bridge",
+    "EnableIPv6": false,
+    "IPAM": {
+      "Driver": "default",
+      "Options": null,
+      "Config": [
+        {
+          "Subnet": "172.17.0.0/16",
+          "Gateway": "172.17.0.1"
+        }
+      ]
+    },
+    "Internal": false,
+    "Attachable": false,
+    "Ingress": false,
+    "ConfigFrom": {
+      "Network": ""
+    },
+    "ConfigOnly": false,
+    "Containers": {},
+    "Options": {
+      "com.docker.network.bridge.default_bridge": "true",
+      "com.docker.network.bridge.enable_icc": "true",
+      "com.docker.network.bridge.enable_ip_masquerade": "true",
+      "com.docker.network.bridge.host_binding_ipv4": "0.0.0.0",
+      "com.docker.network.bridge.name": "docker0",
+      "com.docker.network.driver.mtu": "1500"
+    },
+    "Labels": {}
+  }
+]
+```
+
+Subnet: The subnet used by containers in this network is 172.17.0.0/16. This means containers will be assigned IP addresses within this range.
+Gateway: The gateway for this network is 172.17.0.1. This is the IP address that containers use to communicate with networks outside their own.
+Containers: This field is empty because we haven't started any containers yet.
+Options: These are various configuration options for the bridge network. For example, enable_icc set to "true" means that inter-container communication is allowed on this network.
+
+## Create a Custom Bridge network
+To create a network for specific or related containers it is useful a command:
+docker network create --driver bridge my-network
+The --driver bridge option is optional. But here is included.
+
+Check networks:
+```docker network ls```
+
+## Connect two container to the network
+docker run -d --name container1 --network my-network nginx
+docker run -d --name container2 --network my-network nginx
+
+## Test inter container communication
+```
+docker exec container1 curl -s container2
+```
+In this example we are sending a curl request from container1 to container2. 
+A successful nginx html response indicates that the communication between containers is set.
+
+## Exposing container ports
+By default, containers in a custom network can communicate with each other, but they're not accessible from outside the Docker host. To make a container accessible from the host or external networks, we need to expose its ports.
+
+```
+docker run -d --name exposed-container -p 8080:80 --network my-network nginx
+```
+
+with curl from outside:
+``` curl localhost:8080 ```
+This will result the same answer as in the previous step.
+
+## Using Host networking
+
+``` docker run -d --name host-networked --network host nginx ```
+This command creates a new container named host-networked using the host network. Note that you can't use -p with host networking, as the container is already using the host's network interfaces.
+Lets verify:
+docker inspect --format '{{.HostConfig.NetworkMode}}' host-networked
