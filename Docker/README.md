@@ -206,3 +206,10 @@ This will result the same answer as in the previous step.
 This command creates a new container named host-networked using the host network. Note that you can't use -p with host networking, as the container is already using the host's network interfaces.
 Lets verify:
 docker inspect --format '{{.HostConfig.NetworkMode}}' host-networked
+
+
+## View docker container resource usage
+```
+docker stats --no-stream webserver
+```
+
