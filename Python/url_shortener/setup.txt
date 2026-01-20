@@ -1,0 +1,6 @@
+Create the environment:
+pip install PyMySQL==1.1.0
+
+Start the service and login to mysql service:
+sudo service mysql start
+mysql -u root
