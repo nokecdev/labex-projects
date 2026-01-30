@@ -382,7 +382,7 @@ _________________________________________________
 Create a background process:
 ```sleep 1000 & ```
 
-Get running sleep process's PID and terminate process with SIGTERM:
+## Get running sleep process's PID and terminate process with SIGTERM:
 ```ps aux | grep sleep```
 ```kill PID```
 If no success run the SIGKILL command:
@@ -451,3 +451,24 @@ This means: "Run /path/to/script.sh at 15 and 45 minutes past every hour from 9 
 Useful when terminating processes and cleaning, detatching or other actions required.
 Example code is created in the trap_command.sh file
 
+
+_________________________________________________
+# Special bash variables
+
+#!/bin/bash
+
+Run the following script:
+echo "Script Name: $0"
+echo "First Argument: $1"
+echo "Second Argument: $2"
+echo "All Arguments: $@"
+echo "Number of Arguments: $#"
+echo "Process ID: $$"
+
+
+$0, $1, $2, etc. represent the script name and command-line arguments.
+$@ and $# allow you to work with all arguments and count them.
+$$ gives you the current process ID, useful for creating unique temporary files.
+$? helps you check if the previous command was successful.
+$! gives you the PID of the last background process, useful for job control.
+$@ and $* behave differently when quoted, which is important when handling arguments with spaces.
