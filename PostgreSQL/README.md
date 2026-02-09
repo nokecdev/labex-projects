@@ -119,3 +119,6 @@ Indexes:
 List all tables: \dt
 
 exit: \q
+
+# Write out database to text file:
+sudo -u postgres psql -d <database_name> -c "SQL QUERY HERE" > ~/project/database_schema_result.txt
