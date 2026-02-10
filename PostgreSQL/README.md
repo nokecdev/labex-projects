@@ -122,3 +122,31 @@ exit: \q
 
 # Write out database to text file:
 sudo -u postgres psql -d <database_name> -c "SQL QUERY HERE" > ~/project/database_schema_result.txt
+
+# Query data using Inner join
+
+An INNER JOIN returns only the rows where there is a match in both tables being joined. If there is no match, the row is excluded from the result.
+```
+SELECT orders.order_id, customers.first_name, orders.order_date, orders.total_amount
+FROM orders
+INNER JOIN customers ON orders.customer_id = customers.customer_id;
+```
+
+## Using aliases 
+
+For more complex queries, you can use aliases to make the query more readable. The previous query can be rewritten using aliases:
+```
+SELECT o.order_id, c.first_name, o.order_date, o.total_amount
+FROM orders o
+INNER JOIN customers c ON o.customer_id = c.customer_id;
+```
+
+# LEFT, RIGHT and FULL OUTER JOIN
+- LEFT OUTER JOIN (or LEFT JOIN): Returns all rows from the left table and the matching rows from the right table. If there's no match in the right table, NULL values are returned for the right table's columns.
+- RIGHT OUTER JOIN (or RIGHT JOIN): Returns all rows from the right table and the matching rows from the left table. If there's no match in the left table, NULL values are returned for the left table's columns.
+- FULL OUTER JOIN (or FULL JOIN): Returns all rows from both tables. If there's no match in one table, NULL values are returned for the other table's columns.
+
+In short: (we have customers and orders table, and orders.customer_id references to customer.customer_id)
+LEFT OUTER JOIN includes all rows from the customers table, even if there are no matching orders.
+RIGHT OUTER JOIN includes all rows from the orders table. In our case, it behaves like an INNER JOIN because all orders have a corresponding customer.
+FULL OUTER JOIN includes all rows from both tables.
