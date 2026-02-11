@@ -123,6 +123,42 @@ exit: \q
 # Write out database to text file:
 sudo -u postgres psql -d <database_name> -c "SQL QUERY HERE" > ~/project/database_schema_result.txt
 
+
+
+# Data filtering and simple queries
+
+1. Filtering Data with WHERE
+Use the WHERE clause to retrieve specific rows that match a condition.
+
+Example: SELECT * FROM employees WHERE department = 'Sales';
+What it does: Filters the table to only show employees in a specific department.
+2. Pattern Matching with LIKE and ILIKE
+Use wildcards to find records where a column matches a specific pattern.
+
+% represents zero or more characters.
+_ represents exactly one character.
+Example: SELECT * FROM employees WHERE name LIKE '%o%';
+What it does: Finds names containing the letter "o". (Note: ILIKE is the case-insensitive version).
+3. Sorting Results with ORDER BY
+Use ORDER BY to organize your data.
+
+Example: SELECT * FROM employees ORDER BY salary DESC;
+What it does: Sorts the list by salary from highest to lowest (DESC for descending).
+4. Limiting Results with LIMIT and OFFSET
+These are used to control the number of rows returned and where to start.
+
+Example: SELECT * FROM employees LIMIT 3 OFFSET 2;
+What it does: Returns 3 rows, but skips the first 2 rows. This is very common for implementing "pagination" (like page 1, page 2 of results).
+Summary Table
+Command / Keyword	Purpose
+SELECT * FROM ...	Retrieves all columns from a table.
+WHERE	Filters rows based on a condition.
+LIKE / ILIKE	Searches for a specific pattern in a string.
+ORDER BY	Sorts the result set (default is ASC, use DESC for reverse).
+LIMIT	Restricts the number of rows returned.
+OFFSET	Skips a specific number of rows before starting to return data.
+
+
 # Query data using Inner join
 
 An INNER JOIN returns only the rows where there is a match in both tables being joined. If there is no match, the row is excluded from the result.
