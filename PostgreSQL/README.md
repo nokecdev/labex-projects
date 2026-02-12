@@ -186,3 +186,29 @@ In short: (we have customers and orders table, and orders.customer_id references
 LEFT OUTER JOIN includes all rows from the customers table, even if there are no matching orders.
 RIGHT OUTER JOIN includes all rows from the orders table. In our case, it behaves like an INNER JOIN because all orders have a corresponding customer.
 FULL OUTER JOIN includes all rows from both tables.
+
+# Advanced data types
+
+## PostgreSQL stores two kind of JSON type: JSON and JSONB
+The JSON data type stores an exact copy of the JSON input text, while the JSONB data type stores JSON data in a decomposed binary format. JSONB is generally preferred because it offers better performance for querying and indexing.
+JSONB 
+```
+INSERT INTO products (data) VALUES ('{"name": "Laptop", "price": 1200, "features": ["16GB RAM", "512GB SSD"]}');
+INSERT INTO products (data) VALUES ('{"name": "Keyboard", "price": 75, "features": ["Mechanical", "RGB Backlight"]}');
+SELECT data -> 'features' ->> 0 FROM products WHERE id = 1;
+```
+
+->> operator: returns the result as text
+
+Query json value:
+SELECT data ->> 'name' FROM products WHERE id = 1;
+
+## Array columns
+TEXT[]
+Use @> and && operator to filter data efficiently.
+Filter them by using UNNEST
+
+## UUID (Universally Unique Identifiers)
+Create extension to provide UUID generation:
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
