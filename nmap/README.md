@@ -11,7 +11,15 @@ ss is used to display socket statistics.
 ss -tulwn | grep 8080
 ```
 
-nmap verbosity:
+## nmap verbosity:
 We run nmap with defined port 8080 on localhost, setting verbosity level 1, and print out the result to verbosity-0.txt file
 nmap -p 8080 localhost -v > /home/labex/project/verbosity-0.txt
 
+## Run vulnerability scan on localhost and export the results to the vuln_scan file:
+nmap -sV --script vuln -oN vuln_scan.txt localhost
+Here --script vuln executes vulnerability scripts
+Save the result for future analysis on normal (-oN: TXT) and (-oX: XML) formats
+nmap -sV -p 8080 --script vuln -oN ~/project/reports/scan_report.txt -oX ~/project/reports/scan_report.xml localhost
+
+XML is not very human readable, to format and print out the result in .html, xsltproc provides a utility to convert the xml file to html:
+xsltproc ~/project/reports/scan_report.xml -o ~/project/reports/scan_report.html
