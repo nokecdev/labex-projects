@@ -458,20 +458,21 @@ _________________________________________________
 #!/bin/bash
 
 Run the following script:
+```
 echo "Script Name: $0"
 echo "First Argument: $1"
 echo "Second Argument: $2"
 echo "All Arguments: $@"
 echo "Number of Arguments: $#"
 echo "Process ID: $$"
+```
 
-
-$0, $1, $2, etc. represent the script name and command-line arguments.
-$@ and $# allow you to work with all arguments and count them.
-"$$" gives you the current process ID, useful for creating unique temporary files.
-$? helps you check if the previous command was successful.
-$! gives you the PID of the last background process, useful for job control.
-$@ and $* behave differently when quoted, which is important when handling arguments with spaces.
+* `$0`, `$1`, `$2`, etc. represent the script name and command-line arguments.
+* `"$@"` és `"$#"` allow you to work with all arguments and count them.
+* `$$` gives you the current process ID, useful for creating unique temporary files.
+* `$?` helps you check if the previous command was successful.
+* `$!` gives you the PID of the last background process, useful for job control.
+* `"$@"` and `"$*"` behave differently when quoted, which is important when handling arguments with spaces.
 
 ___
 # Encrypt files with OpenSSL 
