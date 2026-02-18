@@ -436,7 +436,7 @@ List crontab tasks:
 crontab -l
 
 Syntax: 
-* * * * * command_to_execute
+```* * * * * command_to_execute```
 
 Minute (0-59)
 Hour (0-23)
@@ -468,7 +468,31 @@ echo "Process ID: $$"
 
 $0, $1, $2, etc. represent the script name and command-line arguments.
 $@ and $# allow you to work with all arguments and count them.
-$$ gives you the current process ID, useful for creating unique temporary files.
+"$$" gives you the current process ID, useful for creating unique temporary files.
 $? helps you check if the previous command was successful.
 $! gives you the PID of the last background process, useful for job control.
 $@ and $* behave differently when quoted, which is important when handling arguments with spaces.
+
+___
+# Encrypt files with OpenSSL 
+
+Step1: For this demo we'll create a sample.txt file:
+echo "This is a sample text file for encryption testing." >> sample.txt
+
+Step2: Generate a symmetric encryption key and save it in hexadecimal format to __symmetric_key.hex__
+
+Step3: Encrypt the __sample.txt__ file:
+```
+openssl enc -aes-256-cbc -in sample.txt -out sample.enc -pass file:symmetric_key.hex
+```
+- In this step we using aes-256-cbc encoding
+- -in sample.txt: input file to encrypt
+- -out sample.enc: encrypted output file
+- -pass file:symmetric_key.hex: the password we use for encryption
+
+Step4: Decrypt the __sample.enc__ file:
+```
+openssl enc -d -aes-256-cbc -in sample.enc -out sample.dec -pass file:symmetric_key.hex
+```
+
+This command will create a new file: __sample.dec__ containing the original text used in sample.txt
