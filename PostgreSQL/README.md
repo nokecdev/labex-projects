@@ -95,9 +95,7 @@ ERROR:  duplicate key value violates unique constraint "employees_email_key"
 DETAIL:  Key (email)=(john.smith@example.com) already exists.
 
 # Inspect tables:
-use ```
-\d 
-``` command
+use ```\d ``` command
 
 Inspect specific table:
 \d employees:
@@ -204,11 +202,83 @@ Query json value:
 SELECT data ->> 'name' FROM products WHERE id = 1;
 
 ## Array columns
+```
 TEXT[]
 Use @> and && operator to filter data efficiently.
 Filter them by using UNNEST
+```
 
 ## UUID (Universally Unique Identifiers)
+```
 Create extension to provide UUID generation:
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+```
 
+# Role and permission management
+1. Create role
+
+NOLOGIN attribute = this role cannot be used to directly connect to the database\
+``` 
+CREATE ROLE reporting_role NOLOGIN 
+```
+To view database users use: ``` \du ```
+
+2. Grant database privileges
+```
+CREATE DATABASE reporting_db;
+```
+
+Connect to database: 
+```
+\c reporting_db
+```
+
+Create simple table:
+```
+CREATE TABLE sales_data (
+    id SERIAL PRIMARY KEY,
+    product VARCHAR(255),
+    amount DECIMAL
+);
+```
+
+
+Grant SELECT privilege on the sales_data to the reporting_role:
+This will enable any role or user that is member of reporting_role to read from the sales_data table.
+```
+GRANT SELECT ON sales_data TO reporting_role;
+```
+
+3. Create user and Test Privileges
+
+Create a user and grant membership of the reporting_role:
+```
+CREATE USER report_user;
+GRANT reporting_role TO report_user;
+```
+
+Insert sample data into the sales_data table:
+```
+INSERT INTO sales_data (product, amount) VALUES ('Laptop', 1200.00), ('Mouse', 25.00), ('Keyboard', 75.00);
+```
+
+Connect to the database as __report_user__:
+```
+psql -d reporting_db -U report_user
+```
+
+Test the privileges: (SELECT)
+```
+SELECT * FROM sales_data;
+```
+Insert will throw a permission denied error.
+
+4. Revoke privileges
+
+Connect to the database: ```sudo -u postgresl psql```\
+Connect to the report_db ```\c reporting_db```
+
+Revoke the privilege:
+```
+REVOKE SELECT ON sales_data FROM reporting_role;
+```
