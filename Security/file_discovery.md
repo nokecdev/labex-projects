@@ -17,3 +17,8 @@ cat ~/.zshrc
 cat /etc/environment
 cat /etc/profile
 ```
+
+# Search all .sh script by the content of 'maintenance'
+```
+grep -r --include="*.sh" "maintenance" .
+```
