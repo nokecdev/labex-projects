@@ -1,0 +1,32 @@
+---
+- name: Install and start Apache web server
+  hosts: webservers
+  become: true
+  tasks:
+    - name: Install httpd package
+      ansible.builtin.dnf:
+        name: httpd
+        state: present
+
+    - name: Deploy custom index.html
+      ansible.builtin.copy:
+        src: index.html
+        dest: /var/www/html/index.html
+
+    - name: Start and enable httpd service
+      ansible.builtin.service:
+        name: httpd
+        state: started
+        enabled: true
+
+- name: Test web server from localhost
+  hosts: localhost
+  become: false
+  tasks:
+    - name: Verify web server is serving correct content
+      ansible.builtin.uri:
+        url: http://localhost
+        return_content: yes
+        status_code: 200
+      register: result
+      failed_when: "'Ansible-managed' not in result.content"
