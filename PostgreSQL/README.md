@@ -282,3 +282,25 @@ Revoke the privilege:
 ```
 REVOKE SELECT ON sales_data FROM reporting_role;
 ```
+
+# View management
+### Create a simple view
+1. Create view:
+```
+CREATE VIEW employee_info AS
+SELECT first_name, last_name, department
+FROM employees;
+```
+2. SELECT * FROM employee_info;
+3. View description: `\d employee_info`
+
+### Modify the view table:
+This is only possible if:
+- It selects from only one table
+- It does not contain aggregate functions (SUM? AVG, COUNT)
+- Does not contain GROUP BY, having, or DISTINCT clauses.
+```
+UPDATE employee_details
+SET salary = 65000.00
+WHERE employee_id = 1;
+```
