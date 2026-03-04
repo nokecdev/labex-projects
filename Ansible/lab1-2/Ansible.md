@@ -204,3 +204,145 @@ Task: Deploy index.html. This task uses the ansible.builtin.copy module. src spe
 2. Execute the playbvook:
 `ansible-playbook apache.yml`
 
+
+# Manage variables and Facts in RHEL
+
+## Configure web server with custom facts from the managed host
+custom facts/local facts = specific information from the host such as application settings or hardware specific data that Ansible doesn't collect by default
+Ansible looks for custom facts in the `/etc/ansible/facts.d` directory, and every file with .fact extension will be processed.
+
+1. Create the directory:
+```
+sudo mkdir -p /etc/ansible/facts.d
+```
+
+2. Create the Custom Fact file:
+```
+sudo nano /etc/ansible/facts.d/web_config.fact
+```
+Add the following content:
+```
+[webserver]
+welcome_message = Welcome to the server configured by Custom Facts!
+```
+3. Create a Playbook to use the custom fact from anywhere on the host (eg. project folder)
+```
+nano configure_web.yml
+```
+Add the following content to the playbook. 
+Each line means the following:
+name: The name of the Playbook.
+hosts: Specifies which host will the playbook run on.
+become: uses sudo privileges, which is necessary.
+tasks:
+name: Name of the task.
+ansible.builtin.copy: the fundamental module of Ansible. Purpose of this to copy a file or content from the control node to the destination path.
+
+Now let's break down the content variable:
+ansible.facts = root directory of all facts.
+ansible_local = key for all custom facts.
+web_config = this was the name of the file in this example. in step 2.
+webserver = section name [webserver] from the INI file.
+welcome_message = the key for the value we want to use.
+
+```
+---
+- name: Configure web server using custom facts
+  hosts: localhost
+  become: true
+  tasks:
+    - name: Update index.html with custom message
+      ansible.builtin.copy:
+        content: "{{ ansible_facts.ansible_local.web_config.webserver.welcome_message }}"
+        dest: /var/www/html/index.html
+```
+
+4. Save and run the playbook:
+```
+ansible-playbook configure_web.yml
+```
+
+# Create a System User using Encrypted Variables with Ansible Vault
+We will create an encrypted file with a username and a hashed password, and then use a playbook to create a new system user with these credentials.
+
+1. navigate to the project folder: `cd ~/project`
+2. Create an encrypted vault file 
+We will use `ansible-vault create` command to create a new encrypted YAML file named secrets.yml
+We'll set the editor to nano to make it easier to work with: `export EDITOR=nano`
+Create the vault file:
+```
+ansible-vault create secrets.yml
+```
+When prompted enter the password, and a new nano editor will open.
+
+3. Add secrets to the Vault File (when it prompts where to save the .tmp file leave it default)
+```
+username: myappuser
+pwhash: $6$mysalt$QwMzWSEyCAGmz7tzVrAi5o.8k4d05i2QsfGGwmPtlJsWhGjSjCW6yFCH/OEqEsHk7GMSxqYNXu5sshxPmWyxo0
+```
+The password is AnsibleUserP@ssw0rd and it' in a format that the `ansible.builtin.user` easily understands.
+
+
+4. Create a Playbook to use the Vault File
+Add the following to a __new__ create_user.yml file:
+```
+---
+- name: Create a user from secret variables
+  hosts: localhost
+  become: true
+  vars_files:
+    - secrets.yml
+  tasks:
+    - name: Create the {{ username }} user
+      ansible.builtin.user:
+        name: "{{ username }}"
+        password: "{{ pwhash }}"
+        state: present
+```
+
+5. Run the playbook with Vault Pass
+```
+ansible-playbook --ask-vault-pass create_user.yml
+```
+And it will requests the password previously entered.
+
+Verify the user was created:
+`id myappuser`
+
+# Run a Playbook with a Vault Password File to Apply Configurations
+In the previous step we used `--ask-vault-pass` which is not suitable for CI/CD pipelines.
+The solution for this is to use a vault password file.
+For security, it is crucial to restrict the permissions of this password file so that only authorized users can read it.
+
+1. Create the Vault Password file
+echo "password" > vault_pass.txt
+2. Secure the file:
+Grant read+write permissions:
+`chmod 600 vault_pass.txt`
+3. Modify the Playbook to add a user to a group
+`nano create_user.yml`
+Update the task and add the following after state:
+groups: wheel (specifies the group to add the user to)
+append: true (ensures the user is added to this group and not removing from others)
+
+4. Run with Vault Pass file
+Pay attention to the `--vault-password-file`, we used --ask-vault-pass before
+```
+ansible-playbook --vault-password-file vault_pass.txt create_user.yml
+```
+
+# Verify the Web Server and User Configuration
+1. Create the Verification Playbook
+In this step well use ansible for audit and validate of the system state.
+2. Create a verification playbook
+```
+nano verify_config.yml
+```
+3. Add the `verify_config_playbook.yml` file contents to the verify_config.yml
+Let's review the key modules used here:
+
+ansible.builtin.dnf with list: This checks for a package and registers the result.
+ansible.builtin.slurp: This "slurps" up the entire content of a file from the remote host. The content is base64-encoded for safe transport.
+ansible.builtin.getent: This is a safe way to query system databases like passwd and group.
+ansible.builtin.assert: This is the core of our verification. It checks if a given condition is true. If not, it fails the play. We provide custom success and failure messages.
+b64decode: This is a Jinja2 filter used to decode the base64 content we got from the slurp module.
