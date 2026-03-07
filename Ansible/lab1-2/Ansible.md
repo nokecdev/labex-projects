@@ -346,3 +346,220 @@ ansible.builtin.slurp: This "slurps" up the entire content of a file from the re
 ansible.builtin.getent: This is a safe way to query system databases like passwd and group.
 ansible.builtin.assert: This is the core of our verification. It checks if a given condition is true. If not, it fails the play. We provide custom success and failure messages.
 b64decode: This is a Jinja2 filter used to decode the base64 content we got from the slurp module.
+
+# Control Ansible Playbook Execution on RHEL
+
+## Write a Playbook with Loops and Conditionals
+1. Create inventory file: `nano inventory`
+Add content: 
+This will run on localhost and connect to it directly instead of using SSH.
+```
+localhost ansible_connection=local
+```
+
+2. Create a playbook to demonstrate a loop: `nano playbook.yml`
+Add content: 
+
+The loop keyword provides a list of package names which will be used in the loop.
+So Ansible will run the task once for each item in the list substituting the {{item}} placeholder for the current package name.
+
+```
+---
+- name: Install common tools
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Install specified packages
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - git
+        - tree
+        - wget
+```
+
+3. Modify the playbook to include a conditional task
+The _when_ keyword evaluates the given expression
+This example demonstrates that we can add conditional messages.
+```
+    - name: Show message on Red Hat systems
+      ansible.builtin.debug:
+        msg: "This system is a Red Hat family distribution."
+      when: ansible_facts['distribution'] == "RedHat"
+
+    - name: Show message on other systems
+      ansible.builtin.debug:
+        msg: "This system is NOT a Red Hat family distribution."
+      when: ansible_facts['distribution'] != "RedHat"
+```
+
+## Implement Handlers to Trigger Service Restarts
+Handlers execute only when notified by another task, ensuring actions like service restarts occur only upon configuration changes, making the process more efficient than running every time.
+
+1. As before let's create a new inventory. (in a new folder)
+2. Create a html file to serve as a web server.
+```
+nano files/index.html
+```
+
+Add content:
+```
+<h1>Welcome to the Ansible Handler Lab!</h1>
+```
+
+Create playbook. This will create three major actions:
+- install nginx
+- copy the index.html file
+- define handler to reload nginx
+
+```
+---
+- name: Deploy Nginx with a handler
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Ensure Nginx is installed
+      ansible.builtin.dnf:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx service
+      ansible.builtin.systemd:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Copy homepage
+      ansible.builtin.copy:
+        src: files/index.html
+        dest: /usr/share/nginx/html/index.html
+      notify: reload nginx
+
+  handlers:
+    - name: reload nginx
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+```
+
+Verify the web server is running: `curl http://localhost`
+
+Now comes the handler section:
+Let's modify the index.html `<h1>The Handler Ran Again!</h1>`
+save and exit. Run the playbook again:
+```
+ansible-playbook -i inventory deploy_nginx.yml
+```
+
+## Manage Task Failures with Block and Rescue
+ Ansible stops playbook execution on a host if a task fails by default. For more control, you can use ignore_errors or the block, rescue, and always structure to manage tasks and define recovery actions.
+
+1. Create new inventory, and add: ` localhost ansible_connection=local `
+2. Add:
+```
+---
+- name: Demonstrate Task Failure
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Attempt to install a non-existent package
+      ansible.builtin.dnf:
+        name: httpd-fake
+        state: present
+
+    - name: Install MariaDB server
+      ansible.builtin.dnf:
+        name: mariadb-server
+        state: present
+```
+This will fail since httpd-fake package cannot be found, and Ansible will stop.
+For this use `block` and `rescue` to handle failure more elegantly.
+If any task within `block` will fail Ansible will stop in the block and executes the tasks in the `rescue` section.
+Example for the block and rescue section:
+```
+---
+- name: Handle Task Failure with Block and Rescue
+  hosts: localhost
+  become: yes
+  tasks:
+    - name: Attempt primary task, with recovery
+      block:
+        - name: Attempt to install a non-existent package
+          ansible.builtin.dnf:
+            name: httpd-fake
+            state: present
+        - name: This task will be skipped
+          ansible.builtin.debug:
+            msg: "This message will not appear because the previous task fails."
+      rescue:
+        - name: Install MariaDB server on failure
+          ansible.builtin.dnf:
+            name: mariadb-server
+            state: present
+      always:
+        - name: This always runs
+          ansible.builtin.debug:
+            msg: "The block has completed, either by success or rescue."
+```
+In this example the step will fail again, but moves to the rescue section and successfully instals mariadb-server.
+
+## Control Task State with changed_when and failed_when
+`changed_when` allows customization of task reporting in Ansible, defining a condition for "changed" state essential for idempotent playbooks. `failed_when` overrides default failure criteria when a command exits non-zero, enabling playbook continuation based on output or specific exit codes.
+
+1. Using "changed_when"
+A playbook running the date command shows a default behavior, reporting it as a change despite no system alteration.
+```
+---
+- name: Control Task State
+  hosts: localhost
+  tasks:
+    - name: Check local time (default behavior)
+      ansible.builtin.command: date
+```
+
+Run the playbook:
+```
+ansible-playbook -i inventory playbook.yml
+```
+
+Using failed_when
+Check a file existence that isn't there.
+For this demo create a new file:
+```
+echo "System is running" > status.txt
+```
+The playbook will fail because no `ERROR` in the file:
+
+```
+tasks:
+  - name: Check for ERROR in status file (will fail)
+    ansible.builtin.command: grep ERROR status.txt
+```
+
+Update:
+```
+---
+- name: Control Task State
+  hosts: localhost
+  tasks:
+    - name: Check for ERROR in status file (with failed_when)
+      ansible.builtin.command: grep ERROR status.txt
+      register: grep_result
+      failed_when: grep_result.rc > 1
+      changed_when: false
+```
+
+
+## Deploy a Secure Web Server Using Task Control
+Combine loops, conditionals, handlers, and error handling to deploy Apache web server, secure with __mod_ssl__, generate __self-signed SSL__ certificate, and create custom homepage.
+Due to the length of this playbook it had been moved to __playbook_3.yml__
+
+- vars: Defines package variables and SSL paths for improved playbook readability.
+- Stops Nginx Task: service to free port 80 for Apache, ignoring errors if stopped.
+- Install Task: Uses the packages_to_install variable to install both httpd and mod_ssl.
+- Generate self-signed certificate using openssl; task is idempotent and runs only if certificate file does not exist.
+- Deploys index.html and restarts httpd if changes are detected.
+- Starts and enables httpd service to run automatically on boot.
+- Restart httpd handler restarts Apache via systemd on file changes.
+
