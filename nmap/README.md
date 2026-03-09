@@ -23,3 +23,6 @@ nmap -sV -p 8080 --script vuln -oN ~/project/reports/scan_report.txt -oX ~/proje
 
 XML is not very human readable, to format and print out the result in .html, xsltproc provides a utility to convert the xml file to html:
 xsltproc ~/project/reports/scan_report.xml -o ~/project/reports/scan_report.html
+
+# Run SYN Scan:
+-sS This argument is less detectable since it does not create a complete TCP connection.
