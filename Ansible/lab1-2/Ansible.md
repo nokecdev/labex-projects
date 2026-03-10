@@ -563,3 +563,248 @@ Due to the length of this playbook it had been moved to __playbook_3.yml__
 - Starts and enables httpd service to run automatically on boot.
 - Restart httpd handler restarts Apache via systemd on file changes.
 
+
+______________________________________________________________________
+# Install a Role Dependency from a Git Repository using requirements.yml
+Ansible uses a file typically named `requirements.yml` to define a list of roles to be installed.
+
+Note: Since ansible was not found in this lab installed with: `sudo dnf install -y ansible-core`
+1. Create roles directory: `mkdir -p ~/poject/roles`
+2. Navigate into it: `cd ~/project/roles`
+3. Initialize it: `ansible-galaxy init apache.developer_configs`
+
+
+Create role:
+`nano roles/requirements.yml`
+
+```
+- name: infra.apache
+  src: https://github.com/geerlingguy/ansible-role-apache.git
+  scm: git
+  version: 3.2.0
+```
+
+- src = the source of the git repository
+- scm = source control management tool which is git
+- version = the specified git branch
+
+## Integrate an RHEL System Role from an Ansible Collection
+We are going to install the Community General collection for Ansible. This Community General collection for Ansible has a lot of modules. We can use these modules to tasks. The Community General collection for Ansible is really helpful for managing SELinux.
+
+In our situation with the web server we need to configure SELinux. This is necessary so Apache can listen on -standard ports. The Community General collection for Ansible has modules for SELinux. We will use these SELinux modules from the Community General collection, for Ansible.
+
+install required collections: 
+`ansible-galaxy collection install community.general:7.5.0 ansible.posix:1.5.4 -p collections`
+
+## Assemble playbook and run
+#### 1. Create Ansible Configuration and Inventory
+
+ansible.cfg - how to behave. Where are files/collections and inventory.
+```
+[defaults]
+inventory = inventory
+roles_path = roles
+collections_paths = collections
+host_key_checking = False
+
+[privilege_escalation]
+become = True
+```
+
+What is it means?
+- inventory = inventory: Instead of using -i argument, use this file instead
+- host_key_checking: prevents SSH key verification
+
+Create inventory: 
+```
+localhost ansible_collection=local
+```
+
+#### 2. Define Role variables
+Instead of hardcoding use variables
+- group_vars/all - special location: it will becomes available in playbooks and roles.
+
+- mkdir -p group_vars/all
+- nano group_vars/all/developers.yml
+Add content:
+```
+---
+web_developers:
+  - username: jdoe # First developer
+    port: 9081 # Custom port for this developer's website
+  - username: jdoe2 # Second developer
+    port: 9082 # Custom port for this developer's website
+```
+
+Configure SELinux:
+nano group_vars/all/selinux.yml
+```
+---
+selinux_state: enforcing # Set SELinux to enforcing mode (highest security)
+selinux_ports: # List of ports to allow Apache to use
+  - ports: "9081" # Allow port 9081
+    proto: "tcp" # Protocol: TCP
+    setype: "http_port_t" # SELinux type: HTTP port
+    state: "present" # Add this rule
+  - ports: "9082" # Allow port 9082
+    proto: "tcp" # Protocol: TCP
+    setype: "http_port_t" # SELinux type: HTTP port
+    state: "present" # Add this rule
+```
+
+#### 3. Populate the Role (Jinja2 syntax)
+```
+nano roles/apache.developer_configs/templates/developer.conf.j2
+```
+
+```
+{% for dev in web_developers %}
+Listen {{ dev.port }}
+<VirtualHost *:{{ dev.port }}>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/{{ dev.username }}
+
+    <Directory /var/www/{{ dev.username }}>
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+</VirtualHost>
+{% endfor %}
+```
+This means: 
+- We loop through the developer list
+- Set the developer port
+- Set username
+- {% endfor %} ends the loop 
+
+So this makes our two developer: jdoe with port 9081 and jdoe 9082 and serve each content from their own location
+
+
+Next create the main task and add the following to: `nano roles/apache.developer_configs/tasks/main.yml`
+
+```
+---
+# Task 1: Create user accounts for each developer
+- name: Create developer user accounts
+  ansible.builtin.user: # Use the 'user' module
+    name: "{{ item.username }}" # Create user with this name
+    state: present # Ensure the user exists
+  loop: "{{ web_developers }}" # Do this for each developer in the list
+
+# Task 2: Create web directories for each developer
+- name: Create developer web root directories
+  ansible.builtin.file: # Use the 'file' module
+    path: "/var/www/{{ item.username }}" # Create this directory
+    state: directory # Ensure it's a directory
+    owner: "{{ item.username }}" # Set the owner
+    group: "{{ item.username }}" # Set the group
+    mode: "0755" # Set permissions (rwxr-xr-x)
+  loop: "{{ web_developers }}"
+
+# Task 3: Create a sample webpage for each developer
+- name: Create a sample index.html for each developer
+  ansible.builtin.copy: # Use the 'copy' module
+    content: "Welcome to {{ item.username }}'s dev space\n" # File content
+    dest: "/var/www/{{ item.username }}/index.html" # Where to put the file
+    owner: "{{ item.username }}" # File owner
+    group: "{{ item.username }}" # File group
+    mode: "0644" # File permissions (rw-r--r--)
+  loop: "{{ web_developers }}"
+
+# Task 4: Deploy the Apache configuration file
+- name: Deploy developer apache configs
+  ansible.builtin.template: # Use the 'template' module
+    src: developer.conf.j2 # Source template file
+    dest: /etc/httpd/conf.d/developer.conf # Destination on the server
+    mode: "0644" # File permissions
+  notify: restart apache # Trigger the restart handler when this changes
+```
+
+
+Handlers are special tasks that only run when notified by other tasks. They're typically used for actions like restarting services.
+Why use handlers:
+- restarts if configuration changes
+- order: runs tasks, and after the handlers
+- idempotency: multiple tasks can notify the same handler, but only runs only once
+
+`nano roles/apache.developer_configs/handlers/main.yml`
+```
+---
+- name: restart apache # This name must match the notify: statement
+  ansible.builtin.service: # Use the 'service' module
+    name: httpd # The service name (Apache is called 'httpd' on RHEL)
+    state: restarted # Restart the service
+```
+
+Finally, we need to tell Ansible that our custom role depends on the infra.apache role we installed earlier.
+```
+nano roles/apache.developer_configs/meta/main.yml
+```
+
+Replace the contents with:
+```
+---
+dependencies:
+  - role: infra.apache # This role must run before our custom role
+```
+
+#### 4. Create and Run the Playbook
+nano web_dev_server.yml
+
+```
+---
+- name: Configure Dev Web Server # Playbook name
+  hosts: localhost # Run on localhost
+  pre_tasks: # Tasks that run before roles
+    # Task 1: Configure SELinux mode
+    - name: Set SELinux to enforcing mode
+      ansible.posix.selinux: # Module from ansible.posix collection
+        policy: targeted # Use the 'targeted' SELinux policy
+        state: "{{ selinux_state }}" # Use the variable we defined
+      when: selinux_state is defined # Only run if the variable exists
+
+    # Task 2: Configure SELinux ports
+    - name: Configure SELinux ports for Apache
+      community.general.seport: # Module from community.general collection
+        ports: "{{ item.ports }}" # Port number
+        proto: "{{ item.proto }}" # Protocol (tcp)
+        setype: "{{ item.setype }}" # SELinux type (http_port_t)
+        state: "{{ item.state }}" # present or absent
+      loop: "{{ selinux_ports }}" # Loop through our port list
+      when: selinux_ports is defined # Only run if the variable exists
+
+  roles: # Roles to execute
+    - apache.developer_configs # Our custom role (which will trigger infra.apache)
+```
+
+### Verify the SELinux and Apache Configuration on the RHEL Server
+1. Verify configuration
+```
+sestatus
+```
+2. Check open ports:
+```
+sudo semanage port -l | grep http_port_t
+```
+3. Verify Apache Service and Configuration
+```
+ps aux | grep httpd
+```
+You should see several httpd processes running, indicating the service is active.
+```
+root        8851  0.2  0.4  25652 16228 ?        Ss   09:31   0:00 /usr/sbin/httpd -DFOREGROUND
+apache      8852  0.0  0.1  25308  6044 ?        S    09:31   0:00 /usr/sbin/httpd -DFOREGROUND
+apache      8853  0.0  0.3 1443348 11364 ?       Sl   09:31   0:00 /usr/sbin/httpd -DFOREGROUND
+apache      8854  0.0  0.3 1443348 11480 ?       Sl   09:31   0:00 /usr/sbin/httpd -DFOREGROUND
+apache      8855  0.0  0.4 1574484 15848 ?       Sl   09:31   0:00 /usr/sbin/httpd -DFOREGROUND
+labex       9298  0.0  0.0   6408  2176 pts/3    S+   09:31   0:00 grep --color=auto httpd
+```
+
+4. Check Web Content Accessibility 
+- This checks the site for jdoe: `curl http://localhost:9081`
+- jdoe2: `curl http://localhost:9082`
+
+`Welcome to jdoe2's dev space`
+
+Result for both are the defined messages, this indicates the servers are up and running fully automated with Ansible:
