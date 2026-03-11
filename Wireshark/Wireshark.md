@@ -24,3 +24,5 @@ Finally let's add the current user to the wireshark group:
 To take effect run or relogin:
 newgrp wireshark
 
+Filter to captured package. This is the result received from tcp package
+frame contains "Wireshark"
