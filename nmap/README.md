@@ -26,3 +26,37 @@ xsltproc ~/project/reports/scan_report.xml -o ~/project/reports/scan_report.html
 
 # Run SYN Scan:
 -sS This argument is less detectable since it does not create a complete TCP connection.
+
+# UDP (User Datagram Protocol) port scanning
+- less reliable than TCP
+- speed over reliability
+- media streaming, games, DNS lookup
+
+1. Create UDP server witch netcat
+```
+nc -u -l -p 9999 -k
+```
+Meaning:
+- u: UDP instead of default TCP
+- l: listening
+- p 9999: port
+- k: keep running after client disconnect
+
+If port closed:
+- "port uncreachable"
+
+If open:
+- no response at all.
+
+Run UDP scan:
+```
+sudo nmap -sU -p 9999 127.0.0.1 > udp_scan_results.txt
+```
+Meaning:
+- sU: UDP scan
+
+If nc still running there will be a message: `STATE: open|filtered`
+
+Ranged port scanning in nmap:
+- p 9900-10000
+This will scan 10 ports
