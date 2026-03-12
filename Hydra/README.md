@@ -147,3 +147,9 @@ hydra -L ~/project/ftp_users.txt -P ~/project/combined_passwords.txt ftp://local
 Write to file with -o flag:
 hydra -L ~/project/ftp_users.txt -P ~/project/test_passwords.txt ftp://localhost -o ~/project/hydra_results.txt
 
+# Hydra Parallel processing
+Hydra can run multiple attacks simultaneously with the -t option. It determines parallel connections, more threads increase attack speed but also resource usage and traffic, risking system overload or triggering security alerts on the target system.
+```
+hydra -l testuser -P test_passwords.txt 127.0.0.1 ssh -t 8 -vV
+```
+
