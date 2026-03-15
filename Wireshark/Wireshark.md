@@ -30,3 +30,20 @@ Filter to captured package. This is the result received from tcp package
 `frame contains "Wireshark"`
 
 
+Filter to captured packages:
+- This is the result received from tcp package
+`frame contains "Wireshark"`
+- This command checks if the packet larger than 100byte:
+` tcp.len > 100 `
+- Http traffic but not on standard port:
+` http && !(tcp.port == 80) `
+- Communication between specific device and DNS:
+` 
+(ip.src == 192.168.1.100 && ip.dst == 8.8.8.8) || (ip.src == 8.8.8.8 && ip.dst == 192.168.1.100)
+`
+
+#### Contains and matches:
+- HTTP connection contains password string:
+` http contains "password" `
+- tcp packet matching regex expression:
+` tcp matches "GET [^ ]+ HTTP" `
