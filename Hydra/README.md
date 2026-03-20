@@ -153,3 +153,33 @@ Hydra can run multiple attacks simultaneously with the -t option. It determines 
 hydra -l testuser -P test_passwords.txt 127.0.0.1 ssh -t 8 -vV
 ```
 
+# Set up SSH Server
+Install OpenSSH if not installed: `sudo apt install openssh-server -y`
+
+Verify if running: `sudo service ssh status`
+
+1. Create username list: This will contain only one username
+```
+echo "root" > usernames.txt
+```
+
+2. Create password list:
+```
+echo "password" > ~/project/passwords.txt
+echo "123456" >> ~/project/passwords.txt
+echo "$PASSWORD" >> ~/project/passwords.txt
+```
+
+3. Execute command:
+```
+hydra -L usernames.txt -P passwords.txt ssh://localhost
+```
+At this point just simply ran:
+```
+hydra -l "root" -P passwords.txt ssh://localhost
+```
+4. Run with 5 sec gaps:
+```
+hydra -L usernames.txt -P passwords.txt -W 5 ssh://localhost
+```
+
