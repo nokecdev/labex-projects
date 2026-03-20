@@ -60,3 +60,20 @@ If nc still running there will be a message: `STATE: open|filtered`
 Ranged port scanning in nmap:
 - p 9900-10000
 This will scan 10 ports
+
+# nmap OS Detection
+For this demo we running a nc server on port 4444.
+
+Run a basic scan:
+```
+sudo nmap -O localhost -p 4444
+```
+
+Improving OS Detection accuracy
+```
+sudo nmap -O -p 1-1000,4444 --osscan-guess localhost
+```
+--osscan-guess makes the whole scan more aggressive, and somethimes running on a single port is does not provde proper confidence. Using open and closed ports (-p 1-1000,4444) gives more detail about the responses and the OS version and more nmap can decide more reliably.
+-O flag gives a quick overview about the target OS.
+-O --osscan-guess this is better if need more details about the OS information.
+-O --osscan-limit --max-os-tries 1: Useful if you need large-scale scans where speed is important.
