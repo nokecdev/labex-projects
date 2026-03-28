@@ -808,3 +808,89 @@ labex       9298  0.0  0.0   6408  2176 pts/3    S+   09:31   0:00 grep --color=
 `Welcome to jdoe2's dev space`
 
 Result for both are the defined messages, this indicates the servers are up and running fully automated with Ansible:
+
+# Deploy and Manage Files on RHEL with Ansible
+
+## Copy file and set attributes
+1. Create a heredoc
+```
+cat << EOF > ~/project/files/info.txt
+This file was deployed by Ansible.
+It contains important system information.
+EOF
+```
+
+2. create Ansible inventory file
+```
+cat << EOF > ~/project/inventory.ini
+localhost ansible_connection=local
+EOF
+```
+
+3. Create playbook. It contains instructions to `copy a file`. 
+```
+---
+- name: Deploy a static file to localhost
+  hosts: localhost
+  tasks:
+    - name: Copy info.txt and set attributes
+      ansible.builtin.copy:
+        src: files/info.txt
+        dest: /tmp/info.txt
+        owner: labex
+        group: labex
+        mode: "0640"
+```
+
+4. Execute playbook
+```
+ansible-playbook -i inventory.ini copy_file.yml
+```
+
+5. After the file executed the info file will be available at /tmp/info.txt
+
+
+## Modify files with `lineinfile` and `blockinfile`
+This is useful if you don't want to replace the entire file, but only specific lines or blocks.
+
+For example if you want to modify the content of info.txt, the playbook will use `ansible.builtin.lineinfile` and `ansible.builtin.blockinfile`:
+```
+---
+- name: Modify an existing file
+  hosts: localhost
+  tasks:
+    - name: Add a single line of text to a file
+      ansible.builtin.lineinfile:
+        path: /tmp/info.txt
+        line: This line was added by the lineinfile module.
+        state: present
+
+    - name: Add a block of text to an existing file
+      ansible.builtin.blockinfile:
+        path: /tmp/info.txt
+        block: |
+          # BEGIN ANSIBLE MANAGED BLOCK
+          This block of text consists of two lines.
+          They have been added by the blockinfile module.
+          # END ANSIBLE MANAGED BLOCK
+        state: present
+```
+
+- state: present: ensures the line exists
+- state: absent: remove line
+
+## Variables with ansible.builtin.template
+To use variables create a `.j2` file and {{ ... }} will contain the variables for example:
+Welcome to {{ ansible_facts['fqdn'] }}
+Which will be replaced the host's Fully Qualified Domain Name.
+Another example: {{ admin_email }}
+To pass the variable into the .j2 file you can add the `vars` parameter to the playbook:
+```
+  vars:
+    admin_email: hello@example.com
+```
+
+## Create supporting files and symlink with `copy` and `file`
+- Using the `ansible.builtin.file` module.
+- Copy to transfer content
+- file to manage state of file
