@@ -288,3 +288,18 @@ Here are the arguments for pretty command:
 %an = author name
 %s = commit subject
 %cr = relative commit date
+
+
+## Using external diff tool
+With this tool you can compare the differences visually
+
+git config --global diff.tool vimdiff
+git config --global difftool.prompt false
+
+git difftool
+
+To navigate in it:
+:n for next
+:prev for previous file
+:qa! to exit
+
