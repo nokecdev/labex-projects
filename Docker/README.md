@@ -213,3 +213,19 @@ docker inspect --format '{{.HostConfig.NetworkMode}}' host-networked
 docker stats --no-stream webserver
 ```
 
+
+# Volume backup
+docker run --rm -v my_data:/source:ro -v $(pwd):/backup ubuntu tar cvf /backup/my_data_backup.tar -C /source .
+
+docker run --rm: Run a temporary container and remove it when it's done
+-v my_data:/source:ro: Mount our volume as read-only in the container
+-v $(pwd):/backup: Mount the current directory as /backup in the container
+ubuntu: Use the Ubuntu image
+tar cvf /backup/my_data_backup.tar -C /source .: Create a tar archive of the volume data
+
+To restore:
+docker volume create my_restored_data
+docker run --rm -v my_restored_data:/dest -v $(pwd):/backup ubuntu bash -c "tar xvf /backup/my_data_backup.tar -C /dest"
+
+To verify:
+docker run --rm -v my_restored_data:/app/data ubuntu cat /app/data/test.txt
