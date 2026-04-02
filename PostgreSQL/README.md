@@ -304,3 +304,84 @@ UPDATE employee_details
 SET salary = 65000.00
 WHERE employee_id = 1;
 ```
+
+___
+# Event trigger setup
+DDL based meaning it can create, alter or drop database objects
+
+### Trigger function
+
+Create a demo table:
+```
+CREATE TABLE event_log (
+    event_time timestamp with time zone,
+    event_type text,
+    schema_name text,
+    object_name text,
+    command_tag text
+);
+```
+
+### Create trigger function
+```
+CREATE OR REPLACE FUNCTION log_ddl_event()
+RETURNS event_trigger
+AS $$
+BEGIN
+    INSERT INTO event_log (event_time, event_type, schema_name, object_name, command_tag)
+    SELECT now(), tg_event, ddl_command.schema_name, ddl_command.objid::regclass, tg_tag
+    FROM pg_event_trigger_ddl_commands() AS ddl_command;
+END;
+$$ LANGUAGE plpgsql;
+```
+
+
+### Create the DDL event trigger
+```
+CREATE EVENT TRIGGER log_table_creation
+ON ddl_command_end
+WHEN TAG IN ('CREATE TABLE')
+EXECUTE FUNCTION log_ddl_event();
+```
+
+Breaking down this example:
+- `log_table_creation` the name of the trigger
+- `ON ddl_command_end`: This specifies the timing of the trigger. It will fire after a DDL command has finished executing.
+- `WHEN TAG IN ('CREATE TABLE')` Filter condition. Trigger will only activate if the command tag matches `CREATE TABLE`
+- `EXECUTE FUNCTION log_ddl_event()`This specifies to execute log_ddl_event function
+
+To test the trigger create a new table:
+```
+CREATE TABLE employees (
+    id serial PRIMARY KEY,
+    name text NOT NULL
+);
+```
+
+Show results:
+
+```
+SELECT schema_name, object_name, command_tag FROM event_log;
+```
+
+The output will show multiple records:
+```
+ schema_name |   object_name    | command_tag
+-------------+------------------+--------------
+ public      | employees_id_seq | CREATE TABLE
+ public      | employees        | CREATE TABLE
+ public      | employees_pkey   | CREATE TABLE
+ public      | employees_id_seq | CREATE TABLE
+(4 rows)
+```
+
+### Drop trigger and function
+```
+DROP EVENT TRIGGER log_table_creation;
+DROP FUNCTION log_ddl_event();
+```
+
+By creating triggers is perfect for automating, auditing and cleaning up records.
+
+___
+
