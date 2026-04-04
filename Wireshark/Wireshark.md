@@ -47,3 +47,10 @@ Filter to captured packages:
 ` http contains "password" `
 - tcp packet matching regex expression:
 ` tcp matches "GET [^ ]+ HTTP" `
+
+___
+# Filter ip6 addresses use filter options
+- ipv6 
+- icmpv6
+
+___
