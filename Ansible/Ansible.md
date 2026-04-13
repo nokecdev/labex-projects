@@ -808,3 +808,275 @@ labex       9298  0.0  0.0   6408  2176 pts/3    S+   09:31   0:00 grep --color=
 `Welcome to jdoe2's dev space`
 
 Result for both are the defined messages, this indicates the servers are up and running fully automated with Ansible:
+
+# Deploy and Manage Files on RHEL with Ansible
+
+## Copy file and set attributes
+1. Create a heredoc
+```
+cat << EOF > ~/project/files/info.txt
+This file was deployed by Ansible.
+It contains important system information.
+EOF
+```
+
+2. create Ansible inventory file
+```
+cat << EOF > ~/project/inventory.ini
+localhost ansible_connection=local
+EOF
+```
+
+3. Create playbook. It contains instructions to `copy a file`. 
+```
+---
+- name: Deploy a static file to localhost
+  hosts: localhost
+  tasks:
+    - name: Copy info.txt and set attributes
+      ansible.builtin.copy:
+        src: files/info.txt
+        dest: /tmp/info.txt
+        owner: labex
+        group: labex
+        mode: "0640"
+```
+
+4. Execute playbook
+```
+ansible-playbook -i inventory.ini copy_file.yml
+```
+
+5. After the file executed the info file will be available at /tmp/info.txt
+
+
+## Modify files with `lineinfile` and `blockinfile`
+This is useful if you don't want to replace the entire file, but only specific lines or blocks.
+
+For example if you want to modify the content of info.txt, the playbook will use `ansible.builtin.lineinfile` and `ansible.builtin.blockinfile`:
+```
+---
+- name: Modify an existing file
+  hosts: localhost
+  tasks:
+    - name: Add a single line of text to a file
+      ansible.builtin.lineinfile:
+        path: /tmp/info.txt
+        line: This line was added by the lineinfile module.
+        state: present
+
+    - name: Add a block of text to an existing file
+      ansible.builtin.blockinfile:
+        path: /tmp/info.txt
+        block: |
+          # BEGIN ANSIBLE MANAGED BLOCK
+          This block of text consists of two lines.
+          They have been added by the blockinfile module.
+          # END ANSIBLE MANAGED BLOCK
+        state: present
+```
+
+- state: present: ensures the line exists
+- state: absent: remove line
+
+## Variables with ansible.builtin.template
+To use variables create a `.j2` file and {{ ... }} will contain the variables for example:
+Welcome to {{ ansible_facts['fqdn'] }}
+Which will be replaced the host's Fully Qualified Domain Name.
+Another example: {{ admin_email }}
+To pass the variable into the .j2 file you can add the `vars` parameter to the playbook:
+```
+  vars:
+    admin_email: hello@example.com
+```
+
+## Create supporting files and symlink with `copy` and `file`
+- Using the `ansible.builtin.file` module.
+- Copy to transfer content
+- file to manage state of file
+
+___
+# Structure complex playbooks
+In this lab we'll using basic group names, wildcards, exclusions, and logical operators to target specific nodes within the inventory.
+
+
+This `inventory` will define two groups, each containing two hosts:
+```
+[webservers]
+web1.example.com
+web2.example.com
+
+[dbservers]
+db1.lab.net
+db2.lab.net
+```
+
+
+Next, create a new file named `playbook.yml`. This uses the ansible.builtin.debug module and confirms which host the task is running on.
+```
+---
+- name: Test Host Patterns
+  hosts: webservers
+  gather_facts: false
+  tasks:
+    - name: Display the inventory hostname
+      ansible.builtin.debug:
+        msg: "This task is running on {{ inventory_hostname }}"
+```
+
+Run the playbook weith inventory:
+```
+ansible-playbook playbook.yml -i inventory
+```
+
+To define which hosts the playbook will run on you can define for hosts parameter: 
+- "*.lab.net": This will run on all hosts with names ends with lab.net
+- all
+
+## Refining host selection with exclusions and logical operators
+- For example to exclude hosts use `!` (NOT) operator
+- To combine use: `&` (AND) operator
+
+To demonstrate better add the following code to the previous inventory file:
+```
+[production]
+web1.example.com
+db1.lab.net
+```
+
+Update the `playbook.yml` hosts parameter. This means it will select all host, and exclude the `dbservers` from the group:
+```
+hosts: all,!dbservers
+```
+
+For next let's explore the AND operator. This will include all the webservers and production hosts:
+```
+hosts: webservers,&production
+```
+
+## Modularize a play with `include_tasks` and `import_tasks`
+- import_tasks is static. It is processed when the playbook is first parsed by Ansible. This is best for unconditional, structural parts of your play.
+- include_tasks is dynamic. It is processed during the execution of the play. This makes it suitable for use with loops and conditionals.
+
+First, replace the inventory:
+```
+[webservers]
+web1.example.com ansible_host=localhost ansible_connection=local
+web2.example.com ansible_host=localhost ansible_connection=local
+
+[dbservers]
+db1.lab.net ansible_host=localhost ansible_connection=local
+db2.lab.net ansible_host=localhost ansible_connection=local
+```
+
+A commpon practice is to store reusable task files in a dedicated subdirectory: `mkdir tasks`
+Note that the tasks do not contain a full play structure, like `hosts`.
+
+Create a file and for common setup: `nano tasks/web_setup.yml`
+```
+- name: Install the httpd package
+  ansible.builtin.dnf:
+    name: httpd
+    state: present
+  become: true
+```
+
+Create another file for verification: `nano tasks/verify_config.yml`
+```
+- name: Display a verification message
+  ansible.builtin.debug:
+    msg: "Configuration tasks applied to {{ inventory_hostname }}"
+```
+
+Replace the playbook.yml file. This playbook contains the tasks and more structured which is essential on more complex setups:
+```
+---
+- name: Configure Web Servers
+  hosts: webservers
+  gather_facts: false
+  tasks:
+    - name: Import web server setup tasks
+      import_tasks: tasks/web_setup.yml
+
+    - name: Include verification tasks
+      include_tasks: tasks/verify_config.yml
+```
+
+## Composing a Workflow with `import_playbook`
+Import playbook can execute other self-contained playbooks in a specific order.
+Update the layout:
+```
+mkdir playbooks
+mv playbook.yml playbooks/web_config.yml
+nano playbooks/web_config.yml
+```
+
+Update the following in web_config.yml since path changed based on the playbook:
+```
+---
+- name: Configure Web Servers
+  hosts: webservers
+  gather_facts: false
+  tasks:
+    - name: Import web server setup tasks
+      import_tasks: ../tasks/web_setup.yml
+
+    - name: Include verification tasks
+      include_tasks: ../tasks/verify_config.yml
+```
+
+For test, execute the playbook to ensure the paths are correctly setup:
+```
+ansible-playbook playbooks/web_configure.yml -i inventory
+```
+
+
+Create a new playbook for configuring the database servers
+```
+nano playbooks/db_setup.yml
+```
+Add this content to the file:
+```
+---
+- name: Configure Database Servers
+  hosts: dbservers
+  gather_facts: false
+  tasks:
+    - name: Install mariadb package
+      ansible.builtin.dnf:
+        name: mariadb
+        state: present
+      become: true
+
+    - name: Display a confirmation message
+      ansible.builtin.debug:
+        msg: "Database server {{ inventory_hostname }} configured."
+```
+
+Create top level main playbook: `nano main.yml`
+```
+---
+- name: Import the web server configuration play
+  import_playbook: playbooks/web_configure.yml
+
+- name: Import the database server configuration play
+  import_playbook: playbooks/db_setup.yml
+```
+
+Execute:
+```
+ansible-playbook main.yml -i inventory
+```
+
+Structure:
+```
+.
+├── inventory
+├── main.yml
+├── playbooks
+│   ├── db_setup.yml
+│   └── web_configure.yml
+└── tasks
+    ├── verify_config.yml
+    └── web_setup.yml
+```
