@@ -497,3 +497,11 @@ openssl enc -d -aes-256-cbc -in sample.enc -out sample.dec -pass file:symmetric_
 ```
 
 This command will create a new file: __sample.dec__ containing the original text used in sample.txt
+
+
+# Analyzing disk usage
+
+| command | description |
+| ------- | ----------- |
+| df -h | system wide human readable disk usage |
+| sudo du -sh /var | disk usage in /var folder |
