@@ -1080,3 +1080,50 @@ Structure:
     ├── verify_config.yml
     └── web_setup.yml
 ```
+
+# Troubleshoot Playbooks and Hosts
+
+Fix unquoted string and syntax error.
+```
+ansible-playbook --syntax-check webserver.yaml
+```
+
+When the command executed it will print out a detailed error:
+```
+[labex@host ansible_troubleshooting]$ ansible-playbook --syntax-check webserver.yml
+ERROR! We were unable to read either as JSON nor YAML, these are the errors we got from each:
+JSON: Expecting value: line 1 column 1 (char 0)
+
+Syntax Error while loading YAML.
+  mapping values are not allowed in this context
+
+The error appears to be in '/home/labex/project/ansible_troubleshooting/webserver.yml': line 6, column 39, but may
+be elsewhere in the file depending on the exact syntax problem.
+
+The offending line appears to be:
+
+    # ERROR 1: Unquoted colon in string
+    package_comment: This is a package: httpd
+                                      ^ here
+```
+
+After fix both errors you will receive: `playbook: webserver.yml`
+
+
+# Use --check for more detailed error output
+```
+ansible-playbook --check service.yml
+```
+
+# Correct firewall configuration and reachability issues
+Install firewalld and start it
+```
+sudo dnf install -y firewalld
+sudo systemctl start firewalld
+```
+
+This is also needed:
+```
+ansible-galaxy collection install ansible.posix
+```
+
