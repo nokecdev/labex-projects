@@ -216,3 +216,16 @@ The complete url will look like the following:
 http://localhost:8080/api/v1/namespaces/default/pods/${POD_NAME}/proxy
 ```
 
+# Pod & Service Management
+
+## Labeling pods
+kubectl label pods nginx-deployment-6b7f675859-c6cl7 environment=development
+
+## Delete label
+kubectl label pods nginx-deployment-6b7f675859-c6cl7 environment-
+
+# Delete Kubernetes services
+kubectl delete service nginx-clusterip-service
+### Multiple service
+kubectl delete service nginx-clusterip-service nginx-nodeport-service
+
