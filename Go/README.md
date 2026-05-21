@@ -26,3 +26,21 @@ Get the remote module to import it. Use CLI to get it from remote
 go get <remote url>
 ```
 
+
+<br />
+
+# GO variables
+
+If you declare a variable but do not use it, the code will not compile.
+
+## Short declaration
+`:=` means is a local variable. Frequently used inside a function
+```
+a, b, c := 0
+// Declare variables a, b, c as integers and assign an initial value of 0
+a, b, c := 0, "", true
+// Declare variables a, b, c as integer, string, and boolean, respectively
+```
+
+
+
