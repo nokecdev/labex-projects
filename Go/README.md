@@ -43,4 +43,20 @@ a, b, c := 0, "", true
 ```
 
 
+# Integers
+
+Integers can be divided into `unsigned` and `signed` integers.
+
+Unsigned can be divided into four sizes: 8 bits, 16 bits, 32 bits, 64bits represented by uint8, uint16, uint32, uint64.
+
+| Type   | Description         | Range                                       |
+|--------|---------------------|---------------------------------------------|
+| uint8  | 8-bit unsigned int  | 0 to 255                                    |
+| int8   | 8-bit signed int    | -128 to 127                                 |
+| uint16 | 16-bit unsigned int | 0 to 65535                                  |
+| int16  | 16-bit signed int   | -32768 to 32767                             |
+| uint32 | 32-bit unsigned int | 0 to 4294967295                             |
+| int32  | 32-bit signed int   | -2147483648 to 2147483647                   |
+| uint64 | 64-bit unsigned int | 0 to 18446744073709551615                   |
+| int64  | 64-bit signed int   | -9223372036854775808 to 9223372036854775807 |
 
