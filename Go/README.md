@@ -60,3 +60,14 @@ Unsigned can be divided into four sizes: 8 bits, 16 bits, 32 bits, 64bits repres
 | uint64 | 64-bit unsigned int | 0 to 18446744073709551615                   |
 | int64  | 64-bit signed int   | -9223372036854775808 to 9223372036854775807 |
 
+# Char and var types are not the same
+Using '' is for characters and "" used for strings.
+
+In Go, a rune is an alias for the int32 type. While a byte (or uint8) is used to represent a single character of ASCII text, it is not large enough to hold Unicode characters, which can span many different languages and symbols (like emojis).
+
+Here is a simple breakdown:
+
+What exactly is a rune?
+Capacity: Because it uses 32 bits, a rune can represent any Unicode Code Point.
+Purpose: It distinguishes a "character" (a Unicode scalar value) from a "byte" (which is just a sequence of 8 bits).
+Representation: In Go, you define a rune literal by surrounding a character with single quotes, e.g., 'a' or '🙈'.
