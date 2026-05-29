@@ -132,3 +132,84 @@ func main() {
 }
 
 ```
+
+
+# Constants
+
+You can declare one string of constant or multiple
+
+const hello = "HELLO"
+const ( monday, tuesday, wednesday = "MONDAY", "TUESDAY", "WEDNESDAY" )
+
+iota constant generator
+```
+const (
+    monday    = iota // initial value is 0
+    tuesday   = iota // increments by 1 each time
+    wednesday = iota
+    thursday  = iota
+    friday    = iota
+)
+```
+
+You don't need to assign every constant value, the initial value is enough.
+```
+const (
+    monday    = iota // 0
+    tuesday          // 1
+    wednesday        // 2
+    thursday         // 3
+    friday           // 4
+)
+```
+
+To skip a value use underscore
+```
+const (
+    monday  = iota // 0
+    tuesday        // 1
+    _
+    thursday // 3
+    friday   // 4
+)
+```
+
+You can also use the iota operator in arithmetic operations.
+```
+const (
+    a = iota     // 0
+    b = iota * 3 // 1 * 3
+    c = iota + 4 // 2 + 4
+)
+```
+
+## practice iota to generate incremental values
+Task: Create constants using iota to increment values. Assign the memory capacities to it without hardcode the memory values not allowed.
+
+```
+const (
+	SMALL = // TODO: Define the value for SMALL using iota
+	MEDIUM // Do not define the value for MEDIUM
+	LARGE // Do not define the value for LARGE
+	XLARGE // Do not define the value for XLARGE
+)
+
+func main() {
+	// Print out the server size constants
+	// Don't change the following code
+	fmt.Printf("SMALL: %d\n", SMALL)
+	fmt.Printf("MEDIUM: %d\n", MEDIUM)
+	fmt.Printf("LARGE: %d\n", LARGE)
+	fmt.Printf("XLARGE: %d\n", XLARGE)
+}
+```
+
+Solution:
+```
+const (
+	SMALL  = (iota + 1) * 4 // TODO: Define the value for SMALL using iota
+	MEDIUM                  // Do not define the value for MEDIUM
+	LARGE                   // Do not define the value for LARGE
+	XLARGE                  // Do not define the value for XLARGE
+)
+```
