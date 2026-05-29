@@ -103,3 +103,32 @@ Important packages when working with strings:
 - strconv
 - strings
 - utf8
+
+### Strings Practice
+
+```
+package main
+
+import (
+	"fmt"
+	"strings"
+)
+
+func formatUserName(fullName string) string {
+	// TODO: Implement string manipulation to format user name
+	a := strings.Trim(fullName, " ")
+	b := strings.ToLower(a)
+	c := strings.Title(b)
+	return c
+
+    // Also works in one row:
+    // 	return strings.Title(strings.ToLower(strings.Trim(fullName, " ")))
+}
+
+func main() {
+	fmt.Println(formatUserName("  john doe  "))        // Output: John Doe
+	fmt.Println(formatUserName("  alice bob smith  ")) // Output: Alice Bob Smith
+	fmt.Println(formatUserName("JANE DOE"))            // Output: Jane Doe
+}
+
+```
