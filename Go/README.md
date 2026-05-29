@@ -71,3 +71,35 @@ What exactly is a rune?
 Capacity: Because it uses 32 bits, a rune can represent any Unicode Code Point.
 Purpose: It distinguishes a "character" (a Unicode scalar value) from a "byte" (which is just a sequence of 8 bits).
 Representation: In Go, you define a rune literal by surrounding a character with single quotes, e.g., 'a' or '🙈'.
+
+
+# Strings
+
+Two way to create a string:
+`var a string = "Hello"`
+
+b := "World!"
+
+You can print them out by separating with comma
+
+fmt.Println(a, b)
+
+Escape characters also work like `\n`, `\t` `\\` and more.
+
+To print out the string in the original format use the backtick (`) operator
+
+Use len() function to count the number of strings.
+
+Use `strconv` package's `Atoi` function to convert strings to integers.
+
+Concatenate strings with Sprintf
+
+```
+c2 := fmt.Sprintf("%s%s", a, b)
+```
+
+Important packages when working with strings:
+- fmt
+- strconv
+- strings
+- utf8
