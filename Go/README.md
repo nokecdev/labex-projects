@@ -291,3 +291,58 @@ func main() {
 // Output: 1, 3
 ```
 
+# For loops
+Syntax
+```
+for initialization; condition; post {
+    // code block
+}
+```
+
+Initialization and post are optional. We can specify a for loop like `for i < 10` similiarly to while loop in other languages.
+
+### Break keyword
+The `for { }` would run indefinitely but when value of i is 23 it exits from the loop.
+
+```
+func main() {
+    i := 0
+    for {
+        // Increment the value of i by 1 in each loop iteration
+        i++
+        fmt.Printf("1")
+        // Exit the loop when the value of i is 23
+        if i == 23 {
+            break
+        }
+    }
+}
+```
+
+### Continue keyword
+Skips the current iteration and moves to the next.
+
+```
+package main
+
+import "fmt"
+
+func main() {
+    for i := 0; i < 4; i++ {
+        if i == 2 {
+            continue
+        }
+        fmt.Println(i)
+    }
+}
+
+/*
+Output:
+	0
+	1
+	3
+*/
+```
+
+Practice in reverse_string.go
+___
