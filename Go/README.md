@@ -213,3 +213,81 @@ const (
 	XLARGE                  // Do not define the value for XLARGE
 )
 ```
+
+# Switch case
+Go can have multiple case value.
+Example
+
+```
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	// Today's weather
+	weather := "snow"
+	switch weather {
+	case "snow", "stormy":
+		fmt.Println("Remember to wear a scarf today.🧣")
+	case "haze", "sandstorm":
+		fmt.Println("Remember to wear a mask today.😷")
+	case "rainy":
+		fmt.Println("Remember to bring an umbrella today.🌂")
+	default:
+		fmt.Println("Today is sunny.☀")
+	}
+}
+
+```
+
+### Fallthrough statement
+Continues to execute to the next branch after executing the case branch.
+
+Example
+```
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    n := 10
+    switch n {
+    case 10:
+        fmt.Println(1)
+        fallthrough
+    case 3:
+        fmt.Println(2)
+    }
+}
+
+// Output: 1, 3
+```
+
+
+### Initialization statement in switch 
+
+Example
+```
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	switch n := 10; n {
+	case 10:
+		fmt.Println(1)
+		fallthrough
+	case 3:
+		fmt.Println(3)
+	}
+}
+
+// Output: 1, 3
+```
+
