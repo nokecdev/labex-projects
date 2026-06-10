@@ -346,3 +346,47 @@ Output:
 
 Practice in reverse_string.go
 ___
+
+# Goto statement
+
+The goto statement in Go allows for an unconditional jump within a function. It directs program execution to a custom named label. When used wisely, it is excellent for error handling or breaking out of complex nested loops without messy boolean flags.
+
+When using `goto` and the condition match, the next code will not be executed. In for loop this is very similiar to a break statement.
+
+```
+package main
+
+import "fmt"
+
+func main() {
+	for i := 0; ; i++ { // An infinite loop
+		if i == 10 { // Condition to exit the loop
+			goto END // Jump to the "END" label
+		}
+		fmt.Print(i) // Print the current value of i
+	}
+END:
+	fmt.Println("END") // Print "END" after exiting the loop
+}
+
+```
+
+You can use goto to exit nested loops too. So this will exit the loop when j == 3 and continues to the END statement (which does nothing)
+
+```
+package main
+
+import "fmt"
+
+func main() {
+    for i := 0; i < 5; i++ {      // Outer loop
+        for j := 0; j < 5; j++ {  // Inner loop
+            if j == 3 {           // Exit condition
+                goto END          // Jump to the "END" label
+            }
+            fmt.Println(i, j)     // Print the current values of i and j
+        }
+    }
+END:
+}
+```
