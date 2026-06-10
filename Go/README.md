@@ -390,3 +390,6 @@ func main() {
 END:
 }
 ```
+
+# Array Operations
+Practice and complete code available in array_operations.go
