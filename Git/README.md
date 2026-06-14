@@ -292,14 +292,29 @@ Here are the arguments for pretty command:
 
 ## Using external diff tool
 With this tool you can compare the differences visually
-
+```
 git config --global diff.tool vimdiff
 git config --global difftool.prompt false
 
 git difftool
+```
 
 To navigate in it:
 :n for next
 :prev for previous file
 :qa! to exit
+
+
+# Git commit history
+
+View complete diff for all commits.
+```
+git log -p origin/master
+```
+
+View changes of a specific file:
+```
+git log -p origin/master -- file1.txt
+```
+
 
