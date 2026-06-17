@@ -133,6 +133,12 @@ func main() {
 
 ```
 
+#### fmt.Println function and string formatting
+Format Verbs:
+- %d: Used for integers (decimal).
+- %s: Used for strings.
+- %v: A universal "default" format that works for almost any data type.
+
 
 # Constants
 
