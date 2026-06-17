@@ -393,3 +393,49 @@ END:
 
 # Array Operations
 Practice and complete code available in array_operations.go
+
+# Slices
+Slices in programming are dynamic arrays that can change length, unlike fixed-length arrays. While arrays have their applications, slices offer greater flexibility for adding, deleting, modifying, and searching elements, making them more commonly used in day-to-day programming, particularly in Go, where slices are implemented using arrays.
+
+Declare a slice is very similiar to arrays, the main difference is do not declare an array with value.
+
+```
+// Declare an array with a length of 5
+var a1 [5]byte
+// Declare a slice
+var s1 []byte
+```
+
+When we declare a slice it's zero value is `nil`. So when you want to check if it stores any data you most likely would check if `s1 == nil`.
+
+#### Truncate arrays:
+Similiar to python, define a start and end index `[start:end]`
+
+```
+a := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+
+// a[2:3] would be [2]
+// a[1:7] would be [1, 2, 3, 4, 5, 6]
+```
+
+> [!NOTE]
+> Modifying part of the main array will modify the main array too.
+
+#### Add elements
+
+```
+a := [10]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+b := a[1:7] // After truncating it will be [1, 2, 3, 4, 5, 6]
+append(b, 10) // After appending it will be [1, 2, 3, 4, 5, 6, 10]
+```
+
+#### Deleting elements
+Practice: 
+```
+a := []int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}
+s2 := append(a[:3], a[6:]...)
+fmt.Println(s2)
+// Output: [9 8 7 3 2 1 0]
+```
+
+This will 
