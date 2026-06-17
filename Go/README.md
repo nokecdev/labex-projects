@@ -430,7 +430,10 @@ append(b, 10) // After appending it will be [1, 2, 3, 4, 5, 6, 10]
 ```
 
 #### Deleting elements
-Practice: 
+Go does not provide keywords or functions to delete elements from a slice, but we can use array truncation to achieve the same functionality, or a more powerful capability.
+
+
+#### Practice: 
 ```
 a := []int{9, 8, 7, 6, 5, 4, 3, 2, 1, 0}
 s2 := append(a[:3], a[6:]...)
@@ -438,4 +441,13 @@ fmt.Println(s2)
 // Output: [9 8 7 3 2 1 0]
 ```
 
-This will 
+This code will delete (or truncate) the elements starting from index 3 to index 6 and assign it to s2 variable.
+
+
+# Slice functions
+
+| Function         | Meaning                             |
+|------------------|-------------------------------------|
+| append()         | adds elements to the slice or array |
+| copy(s1, s2) | Copies the content of s2 to s1  |
+
