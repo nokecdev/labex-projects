@@ -457,3 +457,84 @@ This code will delete (or truncate) the elements starting from index 3 to index 
 | append()         | adds elements to the slice or array |
 | copy(s1, s2) | Copies the content of s2 to s1  |
 
+
+# Dictionaries
+
+Declaration syntax:
+
+var variableName map[keyType]valueType
+
+In go you need to initialize the dictinary before usage, otherwise will throw an error.
+`
+panic: assignment to entry in nil map
+`
+
+Declare with `make()` function:
+When declaring the make function generates a value of a specified type that has been initialized as its return value.
+
+An other way is to create an empty map that is ready to use without allocating memory explicitly. 
+
+```
+m := map[string]int{}
+```
+
+Add elements to the dict:
+
+```
+m := map[string]int{}
+
+// Adding elements to the map
+m["hello"] = 123
+m["world"] = 6
+
+// Output
+map[hello:123 world:6]
+```
+
+You can also declare dictionaries initially.
+
+```
+m := map[string]int{
+    "hello": 123,
+    "world": 6,
+}
+```
+
+To delete from dictionary use the `delete` function: `delete(dict, "world")`
+
+## How to find values in dictionary
+We declared a dictionary with only one value. The output of the values indicate that does not exist and a value that exists has a default value is the same.
+```
+package main
+
+import "fmt"
+
+func main() {
+    m := map[string]int{
+        "labex": 0,
+    }
+    fmt.Print("The value of labs is: ")
+    fmt.Println(m["labs"])
+    fmt.Print("The value of labex is: ")
+    fmt.Println(m["labex"])
+}
+```
+
+To check if the value exists use the secondary value
+```
+labs, ok := m["world"]
+```
+
+## Iterate in a dictionary
+```
+m := map[string]int{
+    "val": 1,
+    "val2": 2,
+}
+for key, value := range m {
+    fmt.Println(key, value)
+    // "val1" 1
+    // "val2" 2
+}
+```
+
