@@ -505,3 +505,16 @@ This command will create a new file: __sample.dec__ containing the original text
 | ------- | ----------- |
 | df -h | system wide human readable disk usage |
 | sudo du -sh /var | disk usage in /var folder |
+
+
+# Bash getopt
+
+Supports both sort options like `-f` and long options like `--file`.
+
+Syntax
+```
+getopt [options] -- "$@"
+```
+
+Example script available in file_processor.sh
+
